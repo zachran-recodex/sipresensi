@@ -41,4 +41,34 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Create user with karyawan role
+     */
+    public function karyawan(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->assignRole('karyawan');
+        });
+    }
+
+    /**
+     * Create user with admin role
+     */
+    public function admin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->assignRole('admin');
+        });
+    }
+
+    /**
+     * Create user with super admin role
+     */
+    public function superAdmin(): static
+    {
+        return $this->afterCreating(function ($user) {
+            $user->assignRole('super admin');
+        });
+    }
 }
