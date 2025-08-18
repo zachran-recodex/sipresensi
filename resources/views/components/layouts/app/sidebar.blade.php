@@ -15,6 +15,12 @@
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                 </flux:navlist.group>
+
+                @if(auth()->user()->hasRole('super admin') || auth()->user()->hasRole('admin'))
+                <flux:navlist.group :heading="__('Administrator')" class="grid">
+                    <flux:navlist.item icon="users" :href="route('administrator.manage-users')" :current="request()->routeIs('administrator.manage-users')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
+                </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer />

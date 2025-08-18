@@ -11,7 +11,11 @@
       "Bash(composer:*)",
       "Bash(php artisan vendor:publish:*)",
       "Bash(php artisan:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "mcp__laravel-boost__search-docs",
+      "mcp__laravel-boost__tinker",
+      "mcp__laravel-boost__read-log-entries",
+      "Bash(vendor/bin/pint:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
