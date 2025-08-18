@@ -109,6 +109,6 @@ test('username must be unique', function () {
 });
 
 test('user authentication identifier is username', function () {
-    $user = new User();
+    $user = new User;
     expect($user->getAuthIdentifierName())->toBe('username');
 });

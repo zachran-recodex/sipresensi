@@ -1,7 +1,6 @@
 <?php
 
-test('returns a successful response', function () {
+test('redirects to login page', function () {
     $response = $this->get('/');
-
-    $response->assertStatus(200);
+    $response->assertRedirect('/login'); // or whatever your login route is
 });

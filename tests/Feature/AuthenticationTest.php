@@ -62,7 +62,7 @@ test('user cannot login with incorrect password using livewire', function () {
 
 test('login form uses username field', function () {
     $response = $this->get('/login');
-    
+
     $response->assertStatus(200);
     $response->assertSee('Username');
     $response->assertSee('Enter your username and password below to log in');
@@ -70,7 +70,7 @@ test('login form uses username field', function () {
 
 test('register form includes username field', function () {
     $response = $this->get('/register');
-    
+
     $response->assertStatus(200);
     $response->assertSee('Username');
     $response->assertSee('Create an account');
@@ -108,7 +108,7 @@ test('livewire register component includes username', function () {
     // Verify user was created with username
     expect(Auth::check())->toBeTrue();
     expect(Auth::user()->username)->toBe('newuser');
-    
+
     // Verify user exists in database
     $user = User::where('username', 'newuser')->first();
     expect($user)->not->toBeNull();
