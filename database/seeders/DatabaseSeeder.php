@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
         // Call role seeder first
         $this->call(RoleSeeder::class);
 
+        // Call location seeder
+        $this->call(LocationSeeder::class);
+
         // User::factory(10)->create();
 
         // Create test users with roles

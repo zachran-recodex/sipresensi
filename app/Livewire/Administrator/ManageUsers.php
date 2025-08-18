@@ -59,10 +59,19 @@ class ManageUsers extends Component
                     $q->where('name', $this->roleFilter);
                 });
             })
+            // Hide super admin users from admin users
+            ->when(auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin'), function ($query) {
+                $query->whereDoesntHave('roles', function ($q) {
+                    $q->where('name', 'super admin');
+                });
+            })
             ->latest()
             ->paginate(10);
 
-        $roles = Role::all();
+        // Filter roles for admin users - they can't assign super admin role
+        $roles = auth()->user()->hasRole('super admin')
+            ? Role::all()
+            : Role::where('name', '!=', 'super admin')->get();
 
         return view('livewire.administrator.manage-users', compact('users', 'roles'));
     }
@@ -70,6 +79,16 @@ class ManageUsers extends Component
     public function setEditUser(int $userId): void
     {
         $user = User::findOrFail($userId);
+
+        // Prevent admin from editing super admin users
+        if (auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin')) {
+            if ($user->hasRole('super admin')) {
+                session()->flash('error', 'Anda tidak memiliki izin untuk mengedit super admin.');
+
+                return;
+            }
+        }
+
         $this->resetForm();
         $this->selectedUserId = $user->id;
         $this->selectedUser = $user;
@@ -86,6 +105,16 @@ class ManageUsers extends Component
     public function setDeleteUser(int $userId): void
     {
         $user = User::findOrFail($userId);
+
+        // Prevent admin from deleting super admin users
+        if (auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin')) {
+            if ($user->hasRole('super admin')) {
+                session()->flash('error', 'Anda tidak memiliki izin untuk menghapus super admin.');
+
+                return;
+            }
+        }
+
         $this->selectedUserId = $user->id;
         $this->selectedUser = $user;
     }
@@ -93,6 +122,16 @@ class ManageUsers extends Component
     public function setSelectedUser(int $userId): void
     {
         $user = User::findOrFail($userId);
+
+        // Prevent admin from managing super admin roles
+        if (auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin')) {
+            if ($user->hasRole('super admin')) {
+                session()->flash('error', 'Anda tidak memiliki izin untuk mengelola peran super admin.');
+
+                return;
+            }
+        }
+
         $this->selectedUserId = $user->id;
         $this->selectedUser = $user;
         $this->selectedRoles = $user->roles->pluck('name')->toArray();
@@ -114,7 +153,7 @@ class ManageUsers extends Component
 
         $this->resetForm();
         $this->dispatch('userCreated');
-        $this->dispatch('close-modal', 'create-user');
+        $this->modal('create-user')->close();
         session()->flash('message', 'User berhasil dibuat.');
     }
 
@@ -146,7 +185,7 @@ class ManageUsers extends Component
 
         $this->resetForm();
         $this->dispatch('userUpdated');
-        $this->dispatch('close-modal', 'edit-user');
+        $this->modal('edit-user')->close();
         session()->flash('message', 'User berhasil diperbarui.');
     }
 
@@ -166,7 +205,7 @@ class ManageUsers extends Component
 
         $this->resetForm();
         $this->dispatch('userDeleted');
-        $this->dispatch('close-modal', 'delete-user');
+        $this->modal('delete-user')->close();
         session()->flash('message', 'User berhasil dihapus.');
     }
 
@@ -177,7 +216,7 @@ class ManageUsers extends Component
 
         $this->resetForm();
         $this->dispatch('userUpdated');
-        $this->dispatch('close-modal', 'manage-roles');
+        $this->modal('manage-roles')->close();
         session()->flash('message', 'Role user berhasil diperbarui.');
     }
 
