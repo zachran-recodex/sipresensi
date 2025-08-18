@@ -4,7 +4,7 @@
 		<div class="flex justify-between items-center">
 			<div>
 				<flux:heading size="xl">Kelola Lokasi</flux:heading>
-				<p class="text-zinc-500 dark:text-zinc-400">Buat, edit, hapus lokasi dan kelola status mereka</p>
+				<p class="text-zinc-500">Buat, edit, hapus lokasi dan kelola status mereka</p>
 			</div>
 			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus">
 				Tambah Lokasi
@@ -39,55 +39,52 @@
 		</div>
 
 		<!-- Locations Table -->
-		<div class="overflow-hidden bg-white dark:bg-zinc-800 shadow sm:rounded-lg border-zinc-200 dark:border-zinc-700">
-			<table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-				<thead class="bg-zinc-50 dark:bg-zinc-900">
+		<div class="overflow-hidden bg-white shadow sm:rounded-lg border-zinc-200">
+			<table class="min-w-full divide-y divide-zinc-200">
+				<thead class="bg-zinc-50">
 					<tr>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Lokasi
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Koordinat
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Radius
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Status
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Dibuat
 						</th>
-						<th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+						<th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Aksi
 						</th>
 					</tr>
 				</thead>
-				<tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+				<tbody class="bg-white divide-y divide-zinc-200">
 					@forelse($locations as $location)
 						<tr wire:key="location-{{ $location->id }}">
 							<td class="px-6 py-4 whitespace-nowrap">
 								<div class="flex items-center">
-									<div class="flex-shrink-0">
-										<flux:icon.map-pin class="size-8 text-zinc-400" />
-									</div>
-									<div class="ml-4">
-										<div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+									<div>
+										<div class="text-sm font-medium text-zinc-900">
 											{{ $location->name }}
 										</div>
-										<div class="text-sm text-zinc-500 dark:text-zinc-400">
+										<div class="text-sm text-zinc-500">
 											{{ Str::limit($location->address, 50) }}
 										</div>
 									</div>
 								</div>
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-100">
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
 								<div class="space-y-1">
 									<div>Lat: {{ number_format($location->latitude, 6) }}</div>
 									<div>Lng: {{ number_format($location->longitude, 6) }}</div>
 								</div>
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-100">
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
 								{{ $location->radius_meters }}m
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap">
@@ -98,7 +95,7 @@
 									{{ $location->is_active ? 'Aktif' : 'Tidak Aktif' }}
 								</flux:badge>
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
 								{{ $location->created_at->diffForHumans() }}
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -115,8 +112,8 @@
 					@empty
 						<tr>
 							<td colspan="6" class="px-6 py-12 text-center">
-								<div class="text-zinc-500 dark:text-zinc-400">
-									<flux:icon.map-pin class="mx-auto size-12 mb-4 text-zinc-300 dark:text-zinc-600" />
+								<div class="text-zinc-500">
+									<flux:icon.map-pin class="mx-auto size-12 mb-4 text-zinc-300" />
 									<h3 class="text-sm font-medium">Tidak ada lokasi ditemukan</h3>
 									<p class="text-sm">Coba sesuaikan kriteria pencarian atau filter Anda.</p>
 								</div>
@@ -200,11 +197,11 @@
 				<div class="space-y-4">
 					<flux:heading size="md">Pilih Lokasi di Peta</flux:heading>
 					<div
-						class="h-[500px] rounded border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+						class="h-[500px] rounded border border-zinc-200 overflow-hidden"
 						x-data="leafletMap({ lat: {{ $latitude ? $latitude : '-6.2088' }}, lng: {{ $longitude ? $longitude : '106.8456' }}, bindTo: $wire })"
 						x-init="init()"
 					></div>
-					<p class="text-sm text-zinc-500 dark:text-zinc-400">
+					<p class="text-sm text-zinc-500">
 						Klik pada peta atau drag marker untuk menentukan lokasi yang tepat
 					</p>
 				</div>
@@ -291,11 +288,11 @@
 				<div class="space-y-4">
 					<flux:heading size="md">Edit Lokasi di Peta</flux:heading>
 					<div
-						class="h-[500px] rounded border border-zinc-200 dark:border-zinc-700 overflow-hidden"
+						class="h-[500px] rounded border border-zinc-200 overflow-hidden"
 						x-data="leafletMap({ lat: {{ $latitude ? $latitude : '-6.2088' }}, lng: {{ $longitude ? $longitude : '106.8456' }}, bindTo: $wire })"
 						x-init="init()"
 					></div>
-					<p class="text-sm text-zinc-500 dark:text-zinc-400">
+					<p class="text-sm text-zinc-500">
 						Klik pada peta atau drag marker untuk mengubah lokasi
 					</p>
 				</div>
@@ -324,19 +321,19 @@
 			</div>
 
 			@if($selectedLocation)
-				<div class="bg-zinc-50 dark:bg-zinc-800 p-4 rounded-lg">
-					<div class="text-sm text-zinc-900 dark:text-zinc-100">
+				<div class="bg-zinc-50 p-4 rounded-lg">
+					<div class="text-sm text-zinc-900">
 						<strong>Nama:</strong> {{ $selectedLocation->name }}
 					</div>
-					<div class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+					<div class="text-sm text-zinc-500 mt-1">
 						<strong>Alamat:</strong> {{ $selectedLocation->address }}
 					</div>
-					<div class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+					<div class="text-sm text-zinc-500 mt-1">
 						<strong>Koordinat:</strong> {{ $selectedLocation->latitude }}, {{ $selectedLocation->longitude }}
 					</div>
 				</div>
 
-				<div class="text-sm text-zinc-600 dark:text-zinc-400">
+				<div class="text-sm text-zinc-600">
 					<p><strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan. Semua data terkait lokasi ini akan dihapus secara permanen.</p>
 				</div>
 			@endif
@@ -388,7 +385,7 @@
 					initMap() {
 						const el = this.$el;
 						const center = [Number(lat || -6.2088), Number(lng || 106.8456)];
-						
+
 						// Initialize map
 						this.map = L.map(el, {
 							zoomControl: true,
@@ -407,7 +404,7 @@
 						}).addTo(this.map);
 
 						// Add marker
-						this.marker = L.marker(center, { 
+						this.marker = L.marker(center, {
 							draggable: true,
 							title: 'Drag untuk mengubah posisi'
 						}).addTo(this.map);
@@ -469,10 +466,10 @@
 						if (this.circle) {
 							this.map.removeLayer(this.circle);
 						}
-						
+
 						const radius = Number(this.$wire.radius_meters || 100);
 						const center = this.marker ? this.marker.getLatLng() : [Number(this.$wire.latitude || -6.2088), Number(this.$wire.longitude || 106.8456)];
-						
+
 						this.circle = L.circle(center, {
 							radius: radius,
 							color: '#3b82f6',

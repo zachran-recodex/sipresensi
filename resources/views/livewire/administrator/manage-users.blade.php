@@ -1,10 +1,10 @@
-<div x-data="{}" @close-modal.window="$flux.modal($event.detail).close()">
+<div x-data="{}">
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
                 <flux:heading size="xl">Kelola Pengguna</flux:heading>
-                <p class="text-zinc-500 dark:text-zinc-400">Buat, edit, hapus pengguna dan kelola peran mereka</p>
+                <p class="text-zinc-500">Buat, edit, hapus pengguna dan kelola peran mereka</p>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-user').show()" variant="primary" icon="plus">
                 Tambah Pengguna
@@ -40,28 +40,28 @@
         </div>
 
         <!-- Users Table -->
-        <div class="overflow-hidden bg-white dark:bg-zinc-800 shadow sm:rounded-lg border-zinc-200 dark:border-zinc-700">
-            <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <div class="overflow-hidden bg-white shadow sm:rounded-lg border-zinc-200">
+            <table class="min-w-full divide-y divide-zinc-200">
+                <thead class="bg-zinc-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Pengguna
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Username
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Peran
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Dibuat
                         </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Aksi
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
+                <tbody class="bg-white divide-y divide-zinc-200">
                     @forelse($users as $user)
                         <tr wire:key="user-{{ $user->id }}">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -70,16 +70,16 @@
                                         <flux:avatar size="sm">{{ $user->initials() }}</flux:avatar>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                                        <div class="text-sm font-medium text-zinc-900">
                                             {{ $user->name }}
                                         </div>
-                                        <div class="text-sm text-zinc-500 dark:text-zinc-400">
+                                        <div class="text-sm text-zinc-500">
                                             {{ $user->email }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-100">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                                 {{ $user->username }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -94,28 +94,32 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
                                 {{ $user->created_at->diffForHumans() }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center gap-2 justify-end">
-                                    <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
-                                        Peran
-                                    </flux:button>
-                                    <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
-                                        Edit
-                                    </flux:button>
-                                    <flux:button x-on:click="$wire.setDeleteUser({{ $user->id }}); $flux.modal('delete-user').show()" size="sm" variant="danger" icon="trash">
-                                        Hapus
-                                    </flux:button>
+                                    @if(auth()->user()->hasRole('super admin') || !$user->hasRole('super admin'))
+                                        <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
+                                            Peran
+                                        </flux:button>
+                                        <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
+                                            Edit
+                                        </flux:button>
+                                        <flux:button x-on:click="$wire.setDeleteUser({{ $user->id }}); $flux.modal('delete-user').show()" size="sm" variant="danger" icon="trash">
+                                            Hapus
+                                        </flux:button>
+                                    @else
+                                        <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center">
-                                <div class="text-zinc-500 dark:text-zinc-400">
-                                    <flux:icon.users class="mx-auto size-12 mb-4 text-zinc-300 dark:text-zinc-600" />
+                                <div class="text-zinc-500">
+                                    <flux:icon.users class="mx-auto size-12 mb-4 text-zinc-300" />
                                     <h3 class="text-sm font-medium">Tidak ada pengguna ditemukan</h3>
                                     <p class="text-sm">Coba sesuaikan kriteria pencarian atau filter Anda.</p>
                                 </div>
@@ -134,7 +138,7 @@
 
     <!-- Create User Modal -->
     <flux:modal name="create-user" class="md:w-[32rem]">
-        <form wire:submit="createUser" class="space-y-6">
+        <form wire:submit.prevent="createUser" class="space-y-6">
             <div>
                 <flux:heading size="lg">Buat Pengguna Baru</flux:heading>
                 <flux:subheading>Tambahkan pengguna baru ke sistem</flux:subheading>
@@ -194,7 +198,7 @@
 
     <!-- Edit User Modal -->
     <flux:modal name="edit-user" class="md:w-[32rem]">
-        <form wire:submit="updateUser" class="space-y-6">
+        <form wire:submit.prevent="updateUser" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Pengguna</flux:heading>
                 <flux:subheading>Perbarui informasi pengguna</flux:subheading>
@@ -259,7 +263,7 @@
             </div>
 
             @if($selectedUser)
-                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4">
+                <div class="bg-zinc-50 rounded-lg p-4">
                     <div class="flex items-center">
                         <flux:avatar size="sm">{{ $selectedUser->initials() }}</flux:avatar>
                         <div class="ml-3">
@@ -290,14 +294,14 @@
 
     <!-- Manage Roles Modal -->
     <flux:modal name="manage-roles" class="md:w-[28rem]">
-        <form wire:submit="updateUserRoles" class="space-y-6">
+        <form wire:submit.prevent="updateUserRoles" class="space-y-6">
             <div>
                 <flux:heading size="lg">Kelola Peran Pengguna</flux:heading>
                 <flux:subheading>Tetapkan atau hapus peran dari pengguna ini</flux:subheading>
             </div>
 
             @if($selectedUser)
-                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4">
+                <div class="bg-zinc-50 rounded-lg p-4">
                     <div class="flex items-center">
                         <flux:avatar size="sm">{{ $selectedUser->initials() }}</flux:avatar>
                         <div class="ml-3">
