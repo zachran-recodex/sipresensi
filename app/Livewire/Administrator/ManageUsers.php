@@ -34,6 +34,9 @@ class ManageUsers extends Component
 
     public $roleFilter = '';
 
+    // View mode: 'users' or 'super-admin'
+    public $viewMode = 'users';
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'username' => 'required|string|max:255|unique:users,username',
@@ -48,25 +51,38 @@ class ManageUsers extends Component
 
     public function render()
     {
-        $users = User::with('roles')
-            ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('username', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
-            })
-            ->when($this->roleFilter, function ($query) {
-                $query->whereHas('roles', function ($q) {
-                    $q->where('name', $this->roleFilter);
-                });
-            })
-            // Hide super admin users from admin users
-            ->when(auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin'), function ($query) {
-                $query->whereDoesntHave('roles', function ($q) {
-                    $q->where('name', 'super admin');
-                });
-            })
-            ->latest()
-            ->paginate(10);
+        if ($this->viewMode === 'super-admin') {
+            // Show only super admin users
+            $users = User::with('roles')
+                ->whereHas('roles', function ($query) {
+                    $query->where('name', 'super admin');
+                })
+                ->when($this->search, function ($query) {
+                    $query->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('username', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                })
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Show regular users (excluding super admin)
+            $users = User::with('roles')
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'super admin');
+                })
+                ->when($this->search, function ($query) {
+                    $query->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('username', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%');
+                })
+                ->when($this->roleFilter, function ($query) {
+                    $query->whereHas('roles', function ($q) {
+                        $q->where('name', $this->roleFilter);
+                    });
+                })
+                ->latest()
+                ->paginate(10);
+        }
 
         // Filter roles for admin users - they can't assign super admin role
         $roles = auth()->user()->hasRole('super admin')
@@ -74,6 +90,13 @@ class ManageUsers extends Component
             : Role::where('name', '!=', 'super admin')->get();
 
         return view('livewire.administrator.manage-users', compact('users', 'roles'));
+    }
+
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+        $this->resetPage();
+        $this->reset(['search', 'roleFilter']);
     }
 
     public function setEditUser(int $userId): void
@@ -230,6 +253,7 @@ class ManageUsers extends Component
         $this->selectedUserId = null;
         $this->selectedUser = null;
         $this->selectedRoles = [];
+        $this->viewMode = 'users';
 
         // Reset validation rules
         $this->rules['username'] = 'required|string|max:255|unique:users,username';

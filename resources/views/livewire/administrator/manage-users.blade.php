@@ -11,6 +11,26 @@
             </flux:button>
         </div>
 
+        <!-- View Mode Toggle -->
+        @if(auth()->user()->hasRole('super admin'))
+            <div class="flex space-x-1 p-1 bg-zinc-100 rounded-lg w-fit">
+                <flux:button 
+                    wire:click="setViewMode('users')" 
+                    variant="{{ $viewMode === 'users' ? 'primary' : 'ghost' }}"
+                    size="sm"
+                >
+                    Pengguna Biasa
+                </flux:button>
+                <flux:button 
+                    wire:click="setViewMode('super-admin')" 
+                    variant="{{ $viewMode === 'super-admin' ? 'primary' : 'ghost' }}"
+                    size="sm"
+                >
+                    Super Admin
+                </flux:button>
+            </div>
+        @endif
+
         <!-- Success/Error Messages -->
         @if (session('message'))
             <flux:callout variant="success" dismissible>
@@ -31,12 +51,14 @@
                 placeholder="Cari pengguna berdasarkan nama, username, atau email..."
                 icon="magnifying-glass"
             />
-            <flux:select wire:model.live="roleFilter" placeholder="Filter berdasarkan peran">
-                <flux:select.option value="">Semua Peran</flux:select.option>
-                @foreach($roles as $role)
-                    <flux:select.option value="{{ $role->name }}">{{ ucfirst($role->name) }}</flux:select.option>
-                @endforeach
-            </flux:select>
+            @if($viewMode === 'users')
+                <flux:select wire:model.live="roleFilter" placeholder="Filter berdasarkan peran">
+                    <flux:select.option value="">Semua Peran</flux:select.option>
+                    @foreach($roles as $role)
+                        <flux:select.option value="{{ $role->name }}">{{ ucfirst($role->name) }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+            @endif
         </div>
 
         <!-- Users Table -->
@@ -99,18 +121,36 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center gap-2 justify-end">
-                                    @if(auth()->user()->hasRole('super admin') || !$user->hasRole('super admin'))
-                                        <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
-                                            Peran
-                                        </flux:button>
-                                        <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
-                                            Edit
-                                        </flux:button>
-                                        <flux:button x-on:click="$wire.setDeleteUser({{ $user->id }}); $flux.modal('delete-user').show()" size="sm" variant="danger" icon="trash">
-                                            Hapus
-                                        </flux:button>
+                                    @if($viewMode === 'super-admin')
+                                        <!-- Super Admin users - only super admin can manage them -->
+                                        @if(auth()->user()->hasRole('super admin'))
+                                            <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
+                                                Peran
+                                            </flux:button>
+                                            <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
+                                                Edit
+                                            </flux:button>
+                                            <flux:button x-on:click="$wire.setDeleteUser({{ $user->id }}); $flux.modal('delete-user').show()" size="sm" variant="danger" icon="trash">
+                                                Hapus
+                                            </flux:button>
+                                        @else
+                                            <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                        @endif
                                     @else
-                                        <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                        <!-- Regular users -->
+                                        @if(auth()->user()->hasRole('super admin') || !$user->hasRole('super admin'))
+                                            <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
+                                                Peran
+                                            </flux:button>
+                                            <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
+                                                Edit
+                                            </flux:button>
+                                            <flux:button x-on:click="$wire.setDeleteUser({{ $user->id }}); $flux.modal('delete-user').show()" size="sm" variant="danger" icon="trash">
+                                                Hapus
+                                            </flux:button>
+                                        @else
+                                            <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -120,7 +160,13 @@
                             <td colspan="5" class="px-6 py-12 text-center">
                                 <div class="text-zinc-500">
                                     <flux:icon.users class="mx-auto size-12 mb-4 text-zinc-300" />
-                                    <h3 class="text-sm font-medium">Tidak ada pengguna ditemukan</h3>
+                                    <h3 class="text-sm font-medium">
+                                        @if($viewMode === 'super-admin')
+                                            Tidak ada super admin ditemukan
+                                        @else
+                                            Tidak ada pengguna ditemukan
+                                        @endif
+                                    </h3>
                                     <p class="text-sm">Coba sesuaikan kriteria pencarian atau filter Anda.</p>
                                 </div>
                             </td>
