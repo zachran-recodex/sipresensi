@@ -124,9 +124,6 @@
                                     @if($viewMode === 'super-admin')
                                         <!-- Super Admin users - only super admin can manage them -->
                                         @if(auth()->user()->hasRole('super admin'))
-                                            <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
-                                                Peran
-                                            </flux:button>
                                             <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
                                                 Edit
                                             </flux:button>
@@ -139,9 +136,6 @@
                                     @else
                                         <!-- Regular users -->
                                         @if(auth()->user()->hasRole('super admin') || !$user->hasRole('super admin'))
-                                            <flux:button x-on:click="$wire.setSelectedUser({{ $user->id }}); $flux.modal('manage-roles').show()" size="sm" variant="ghost" icon="user-group">
-                                                Peran
-                                            </flux:button>
                                             <flux:button x-on:click="$wire.setEditUser({{ $user->id }}); $flux.modal('edit-user').show()" size="sm" variant="ghost" icon="pencil">
                                                 Edit
                                             </flux:button>
@@ -228,6 +222,15 @@
                 required
             />
 
+            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Peran">
+                @foreach($roles as $role)
+                    <flux:checkbox
+                        value="{{ $role->name }}"
+                        label="{{ ucfirst($role->name) }}"
+                    />
+                @endforeach
+            </flux:checkbox.group>
+
             <div class="flex gap-3">
                 <flux:spacer />
 
@@ -286,6 +289,15 @@
                 placeholder="Konfirmasi kata sandi baru"
             />
 
+            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Peran">
+                @foreach($roles as $role)
+                    <flux:checkbox
+                        value="{{ $role->name }}"
+                        label="{{ ucfirst($role->name) }}"
+                    />
+                @endforeach
+            </flux:checkbox.group>
+
             <div class="flex gap-3">
                 <flux:spacer />
 
@@ -336,48 +348,5 @@
                 </flux:modal.close>
             </div>
         </div>
-    </flux:modal>
-
-    <!-- Manage Roles Modal -->
-    <flux:modal name="manage-roles" class="md:w-[28rem]">
-        <form wire:submit.prevent="updateUserRoles" class="space-y-6">
-            <div>
-                <flux:heading size="lg">Kelola Peran Pengguna</flux:heading>
-                <flux:subheading>Tetapkan atau hapus peran dari pengguna ini</flux:subheading>
-            </div>
-
-            @if($selectedUser)
-                <div class="bg-zinc-50 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <flux:avatar size="sm">{{ $selectedUser->initials() }}</flux:avatar>
-                        <div class="ml-3">
-                            <div class="text-sm font-medium">{{ $selectedUser->name }}</div>
-                            <div class="text-sm text-zinc-500">{{ $selectedUser->email }}</div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Peran">
-                @foreach($roles as $role)
-                    <flux:checkbox
-                        value="{{ $role->name }}"
-                        label="{{ ucfirst($role->name) }}"
-                    />
-                @endforeach
-            </flux:checkbox.group>
-
-            <div class="flex gap-3">
-                <flux:spacer />
-
-                <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Perbarui Peran</span>
-                    <span wire:loading>Memproses...</span>
-                </flux:button>
-                <flux:modal.close>
-                    <flux:button variant="ghost">Batal</flux:button>
-                </flux:modal.close>
-            </div>
-        </form>
     </flux:modal>
 </div>

@@ -118,6 +118,7 @@ class ManageUsers extends Component
         $this->name = $user->name;
         $this->username = $user->username;
         $this->email = $user->email;
+        $this->selectedRoles = $user->roles->pluck('name')->toArray();
 
         // Update validation rules for edit (exclude current user)
         $this->rules['username'] = 'required|string|max:255|unique:users,username,'.$user->id;
@@ -142,24 +143,6 @@ class ManageUsers extends Component
         $this->selectedUser = $user;
     }
 
-    public function setSelectedUser(int $userId): void
-    {
-        $user = User::findOrFail($userId);
-
-        // Prevent admin from managing super admin roles
-        if (auth()->user()->hasRole('admin') && ! auth()->user()->hasRole('super admin')) {
-            if ($user->hasRole('super admin')) {
-                session()->flash('error', 'Anda tidak memiliki izin untuk mengelola peran super admin.');
-
-                return;
-            }
-        }
-
-        $this->selectedUserId = $user->id;
-        $this->selectedUser = $user;
-        $this->selectedRoles = $user->roles->pluck('name')->toArray();
-    }
-
     public function createUser(): void
     {
         $this->validate();
@@ -171,8 +154,12 @@ class ManageUsers extends Component
             'password' => Hash::make($this->password),
         ]);
 
-        // Assign karyawan role by default
-        $user->assignRole('karyawan');
+        // Assign selected roles or default to karyawan if none selected
+        if (! empty($this->selectedRoles)) {
+            $user->assignRoles($this->selectedRoles);
+        } else {
+            $user->assignRole('karyawan');
+        }
 
         $this->resetForm();
         $this->dispatch('userCreated');
@@ -206,6 +193,11 @@ class ManageUsers extends Component
 
         $user->update($updateData);
 
+        // Update user roles
+        if (! empty($this->selectedRoles)) {
+            $user->syncRoles($this->selectedRoles);
+        }
+
         $this->resetForm();
         $this->dispatch('userUpdated');
         $this->modal('edit-user')->close();
@@ -230,17 +222,6 @@ class ManageUsers extends Component
         $this->dispatch('userDeleted');
         $this->modal('delete-user')->close();
         session()->flash('message', 'User berhasil dihapus.');
-    }
-
-    public function updateUserRoles(): void
-    {
-        $user = User::findOrFail($this->selectedUserId);
-        $user->syncRoles($this->selectedRoles);
-
-        $this->resetForm();
-        $this->dispatch('userUpdated');
-        $this->modal('manage-roles')->close();
-        session()->flash('message', 'Role user berhasil diperbarui.');
     }
 
     public function resetForm(): void
