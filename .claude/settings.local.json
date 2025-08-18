@@ -10,7 +10,8 @@
       "mcp__context7__get-library-docs",
       "Bash(composer:*)",
       "Bash(php artisan vendor:publish:*)",
-      "Bash(php artisan:*)"
+      "Bash(php artisan:*)",
+      "Bash(rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
