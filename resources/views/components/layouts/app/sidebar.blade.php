@@ -20,6 +20,7 @@
                 <flux:navlist.group heading="Administrator" class="grid">
                     <flux:navlist.item icon="users" :href="route('administrator.manage-users')" :current="request()->routeIs('administrator.manage-users')" wire:navigate>Kelola Pengguna</flux:navlist.item>
                     <flux:navlist.item icon="map-pin" :href="route('administrator.manage-locations')" :current="request()->routeIs('administrator.manage-locations')" wire:navigate>Kelola Lokasi</flux:navlist.item>
+                    <flux:navlist.item icon="clock" :href="route('administrator.manage-attendances')" :current="request()->routeIs('administrator.manage-attendances')" wire:navigate>Kelola Kehadiran</flux:navlist.item>
                 </flux:navlist.group>
                 @endif
             </flux:navlist>

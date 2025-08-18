@@ -7,7 +7,7 @@
 				<p class="text-zinc-500">Buat, edit, hapus lokasi dan kelola status mereka</p>
 			</div>
 			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus">
-				Tambah Lokasi
+				Tambah
 			</flux:button>
 		</div>
 
@@ -55,9 +55,6 @@
 						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Status
 						</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
-							Dibuat
-						</th>
 						<th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
 							Aksi
 						</th>
@@ -95,9 +92,6 @@
 									{{ $location->is_active ? 'Aktif' : 'Tidak Aktif' }}
 								</flux:badge>
 							</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
-								{{ $location->created_at->diffForHumans() }}
-							</td>
 							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 								<div class="flex items-center gap-2 justify-end">
 									<flux:button x-on:click="$wire.setEditLocation({{ $location->id }}); $flux.modal('edit-location').show()" size="sm" variant="ghost" icon="pencil">
@@ -111,7 +105,7 @@
 						</tr>
 					@empty
 						<tr>
-							<td colspan="6" class="px-6 py-12 text-center">
+							<td colspan="5" class="px-6 py-12 text-center">
 								<div class="text-zinc-500">
 									<flux:icon.map-pin class="mx-auto size-12 mb-4 text-zinc-300" />
 									<h3 class="text-sm font-medium">Tidak ada lokasi ditemukan</h3>
@@ -211,7 +205,7 @@
 				<flux:spacer />
 
 				<flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-					<span wire:loading.remove>Buat Lokasi</span>
+					<span wire:loading.remove>Buat</span>
 					<span wire:loading>Memproses...</span>
 				</flux:button>
 				<flux:modal.close>
@@ -302,7 +296,7 @@
 				<flux:spacer />
 
 				<flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-					<span wire:loading.remove>Perbarui Lokasi</span>
+					<span wire:loading.remove>Perbarui</span>
 					<span wire:loading>Memproses...</span>
 				</flux:button>
 				<flux:modal.close>
@@ -342,7 +336,7 @@
 				<flux:spacer />
 
 				<flux:button wire:click="deleteLocation" variant="danger" wire:loading.attr="disabled">
-					<span wire:loading.remove>Hapus Lokasi</span>
+					<span wire:loading.remove>Hapus</span>
 					<span wire:loading>Memproses...</span>
 				</flux:button>
 				<flux:modal.close>

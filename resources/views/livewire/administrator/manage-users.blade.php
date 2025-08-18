@@ -7,7 +7,7 @@
                 <p class="text-zinc-500">Buat, edit, hapus pengguna dan kelola peran mereka</p>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-user').show()" variant="primary" icon="plus">
-                Tambah Pengguna
+                Tambah
             </flux:button>
         </div>
 
@@ -75,9 +75,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Peran
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                            Dibuat
-                        </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Aksi
                         </th>
@@ -109,15 +106,12 @@
                                     @foreach($user->roles as $role)
                                         <flux:badge
                                             size="sm"
-                                            variant="{{ $role->name === 'super admin' ? 'danger' : ($role->name === 'admin' ? 'warning' : 'neutral') }}"
+                                            color="{{ $role->name === 'super admin' ? 'red' : ($role->name === 'admin' ? 'amber' : 'blue') }}"
                                         >
                                             {{ ucfirst($role->name) }}
                                         </flux:badge>
                                     @endforeach
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500">
-                                {{ $user->created_at->diffForHumans() }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center gap-2 justify-end">
@@ -151,7 +145,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="4" class="px-6 py-12 text-center">
                                 <div class="text-zinc-500">
                                     <flux:icon.users class="mx-auto size-12 mb-4 text-zinc-300" />
                                     <h3 class="text-sm font-medium">
@@ -235,7 +229,7 @@
                 <flux:spacer />
 
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Buat Pengguna</span>
+                    <span wire:loading.remove>Buat</span>
                     <span wire:loading>Memproses...</span>
                 </flux:button>
                 <flux:modal.close>
@@ -302,7 +296,7 @@
                 <flux:spacer />
 
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Perbarui Pengguna</span>
+                    <span wire:loading.remove>Perbarui</span>
                     <span wire:loading>Memproses...</span>
                 </flux:button>
                 <flux:modal.close>
@@ -340,7 +334,7 @@
                 <flux:spacer />
 
                 <flux:button wire:click="deleteUser" variant="danger" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Hapus Pengguna</span>
+                    <span wire:loading.remove>Hapus</span>
                     <span wire:loading>Menghapus...</span>
                 </flux:button>
                 <flux:modal.close>
