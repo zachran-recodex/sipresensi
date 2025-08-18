@@ -89,3 +89,26 @@ test('role can be removed from user', function () {
     expect($user->hasRole('admin'))->toBeFalse();
     expect($user->hasRole('karyawan'))->toBeTrue();
 });
+
+test('user can be created with username', function () {
+    $user = User::factory()->create([
+        'username' => 'testuser',
+    ]);
+
+    expect($user->username)->toBe('testuser');
+    expect($user->username)->not->toBeEmpty();
+});
+
+test('username must be unique', function () {
+    // Create first user with username
+    User::factory()->create(['username' => 'testuser']);
+
+    // Attempt to create second user with same username should throw exception
+    $this->expectException(\Illuminate\Database\QueryException::class);
+    User::factory()->create(['username' => 'testuser']);
+});
+
+test('user authentication identifier is username', function () {
+    $user = new User();
+    expect($user->getAuthIdentifierName())->toBe('username');
+});
