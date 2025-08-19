@@ -13,22 +13,25 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Platform" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dasbor</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>Dashboard</flux:navlist.item>
                 </flux:navlist.group>
 
                 @if(auth()->user()->hasRole('super admin') || auth()->user()->hasRole('admin'))
-                    <flux:navlist.group heading="Administrator" class="grid">
+                    <flux:navlist.group heading="Administrator" class="grid" >
                         <flux:navlist.item icon="users" :href="route('administrator.manage-users')" :current="request()->routeIs('administrator.manage-users')" wire:navigate>Kelola Pengguna</flux:navlist.item>
                         <flux:navlist.item icon="map-pin" :href="route('administrator.manage-locations')" :current="request()->routeIs('administrator.manage-locations')" wire:navigate>Kelola Lokasi</flux:navlist.item>
                         <flux:navlist.item icon="clock" :href="route('administrator.manage-attendances')" :current="request()->routeIs('administrator.manage-attendances')" wire:navigate>Kelola Kehadiran</flux:navlist.item>
+                        <flux:navlist.item icon="document-text" :href="route('administrator.attendance-reports')" :current="request()->routeIs('administrator.attendance-reports')" wire:navigate>Laporan Absensi</flux:navlist.item>
                     </flux:navlist.group>
                 @endif
 
-                <flux:navlist.group heading="Absensi" class="grid">
-                    <flux:navlist.item icon="arrow-right-circle" :href="route('attendance.check-in')" :current="request()->routeIs('attendance.check-in')" wire:navigate>Absensi Masuk</flux:navlist.item>
-                    <flux:navlist.item icon="arrow-left-circle" :href="route('attendance.check-out')" :current="request()->routeIs('attendance.check-out')" wire:navigate>Absensi Keluar</flux:navlist.item>
-                    <flux:navlist.item icon="face-id" :href="route('face.enrollment')" :current="request()->routeIs('face.enrollment')" wire:navigate>Daftar Wajah</flux:navlist.item>
-                </flux:navlist.group>
+                @if(auth()->user()->hasRole('super admin') || auth()->user()->hasRole('karyawan'))
+                    <flux:navlist.group heading="Absensi" class="grid">
+                        <flux:navlist.item icon="arrow-right-circle" :href="route('attendance.check-in')" :current="request()->routeIs('attendance.check-in')" wire:navigate>Absensi Masuk</flux:navlist.item>
+                        <flux:navlist.item icon="arrow-left-circle" :href="route('attendance.check-out')" :current="request()->routeIs('attendance.check-out')" wire:navigate>Absensi Keluar</flux:navlist.item>
+                        <flux:navlist.item icon="face-id" :href="route('face.enrollment')" :current="request()->routeIs('face.enrollment')" wire:navigate>Daftar Wajah</flux:navlist.item>
+                    </flux:navlist.group>
+                @endif
             </flux:navlist>
 
             <flux:spacer />

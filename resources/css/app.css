@@ -23,8 +23,12 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Project Theme Colors */
+    --color-theme-primary: #113760;
+    --color-theme-secondary: #C8CCCD;
+
+    --color-accent: var(--color-theme-primary);
+    --color-accent-content: var(--color-theme-primary);
     --color-accent-foreground: var(--color-white);
 }
 
