@@ -43,6 +43,8 @@ class FaceAttendanceComponent extends Component
 
     public $isLateCheckIn = false;
 
+    public $isEarlyCheckIn = false;
+
     public $isEarlyCheckOut = false;
 
     protected $biznetFaceService;
@@ -172,9 +174,10 @@ class FaceAttendanceComponent extends Component
 
         // Reset status
         $this->isLateCheckIn = false;
+        $this->isEarlyCheckIn = false;
         $this->isEarlyCheckOut = false;
 
-        // Check late check-in
+        // Check check-in timing
         if ($this->todaysAttendance['check_in']) {
             $checkInTime = $this->todaysAttendance['check_in']->recorded_at;
             $expectedCheckInTime = $attendance->clock_in_time;
@@ -185,6 +188,8 @@ class FaceAttendanceComponent extends Component
 
             if ($actualTime > $expectedTime) {
                 $this->isLateCheckIn = true;
+            } elseif ($actualTime < $expectedTime) {
+                $this->isEarlyCheckIn = true;
             }
         }
 
@@ -205,6 +210,7 @@ class FaceAttendanceComponent extends Component
         logger('Attendance timing check', [
             'user_id' => auth()->id(),
             'is_late_check_in' => $this->isLateCheckIn,
+            'is_early_check_in' => $this->isEarlyCheckIn,
             'is_early_check_out' => $this->isEarlyCheckOut,
             'check_in_actual' => $this->todaysAttendance['check_in']?->recorded_at?->format('H:i:s'),
             'check_in_expected' => $attendance->clock_in_time?->format('H:i:s'),
@@ -377,8 +383,9 @@ class FaceAttendanceComponent extends Component
         $clockInTime = $attendance->getFormattedClockInTime();
         $clockOutTime = $attendance->getFormattedClockOutTime();
 
+        // Allow check-in at any time, but mark as early if before scheduled time
         if ($this->attendanceType === 'check_in' && $currentTime < $clockInTime) {
-            throw new \Exception('Belum waktu untuk check in. Waktu check in: '.$clockInTime);
+            // Allow early check-in, will be marked in notes
         }
 
         if ($this->attendanceType === 'check_out' && $currentTime < $clockOutTime) {
@@ -503,6 +510,26 @@ class FaceAttendanceComponent extends Component
                 $notes[] = 'Lokasi tervalidasi: '.$user->attendance->location->name;
             }
 
+            // Add timing notes
+            $attendance = $user->attendance;
+            if ($attendance) {
+                $currentTime = now()->format('H:i');
+                $clockInTime = $attendance->getFormattedClockInTime();
+                $clockOutTime = $attendance->getFormattedClockOutTime();
+
+                if ($this->attendanceType === 'check_in' && $currentTime < $clockInTime) {
+                    $notes[] = 'Check-in lebih awal (jadwal: '.$clockInTime.')';
+                } elseif ($this->attendanceType === 'check_in' && $currentTime > $clockInTime) {
+                    $notes[] = 'Check-in terlambat (jadwal: '.$clockInTime.')';
+                }
+
+                if ($this->attendanceType === 'check_out' && $currentTime < $clockOutTime) {
+                    $notes[] = 'Check-out lebih awal (jadwal: '.$clockOutTime.')';
+                } elseif ($this->attendanceType === 'check_out' && $currentTime > $clockOutTime) {
+                    $notes[] = 'Check-out sesuai/melebihi jadwal (jadwal: '.$clockOutTime.')';
+                }
+            }
+
             AttendanceRecord::create([
                 'user_id' => $user->id,
                 'type' => $this->attendanceType,
@@ -574,6 +601,10 @@ class FaceAttendanceComponent extends Component
             return 'text-red-600 font-semibold';
         }
 
+        if ($this->isEarlyCheckIn) {
+            return 'text-orange-600 font-semibold';
+        }
+
         return 'text-green-600';
     }
 
@@ -597,6 +628,13 @@ class FaceAttendanceComponent extends Component
             $expectedTime = $user?->attendance?->getFormattedClockInTime();
 
             return " (Terlambat - Jam kerja: {$expectedTime})";
+        }
+
+        if ($this->isEarlyCheckIn) {
+            $user = auth()->user();
+            $expectedTime = $user?->attendance?->getFormattedClockInTime();
+
+            return " (Datang lebih awal - Jam kerja: {$expectedTime})";
         }
 
         return ' (Tepat waktu)';
