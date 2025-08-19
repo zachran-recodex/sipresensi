@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,6 +57,22 @@ class User extends Authenticatable
     public function attendance(): HasOne
     {
         return $this->hasOne(Attendance::class);
+    }
+
+    /**
+     * Get the user's face enrollment record.
+     */
+    public function faceEnrollment(): HasOne
+    {
+        return $this->hasOne(FaceEnrollment::class);
+    }
+
+    /**
+     * Get the user's attendance records.
+     */
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
     }
 
     /**

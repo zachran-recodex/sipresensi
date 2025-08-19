@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'biznet_face' => [
+        'api_token' => env('BIZNET_FACE_API_TOKEN'),
+        'api_url' => env('BIZNET_FACE_API_URL'),
+        'gallery_id' => env('BIZNET_FACE_GALLERY_ID'),
+    ],
+
 ];

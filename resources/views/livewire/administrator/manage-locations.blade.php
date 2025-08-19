@@ -150,24 +150,38 @@
 						required
 					/>
 
-					<div class="grid grid-cols-2 gap-4">
-						<flux:input
-							wire:model="latitude"
-							label="Latitude"
-							type="number"
-							step="0.000001"
-							placeholder="-6.2088"
-							required
-						/>
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<label class="text-sm font-medium text-zinc-700">Koordinat Lokasi</label>
+							<flux:button 
+								x-on:click="getCurrentLocation()" 
+								size="sm" 
+								variant="outline" 
+								icon="map-pin"
+								title="Gunakan lokasi saat ini"
+							>
+								Gunakan Lokasi Disini
+							</flux:button>
+						</div>
+						<div class="grid grid-cols-2 gap-4">
+							<flux:input
+								wire:model="latitude"
+								label="Latitude"
+								type="number"
+								step="0.000001"
+								placeholder="-6.2088"
+								required
+							/>
 
-						<flux:input
-							wire:model="longitude"
-							label="Longitude"
-							type="number"
-							step="0.000001"
-							placeholder="106.8456"
-							required
-						/>
+							<flux:input
+								wire:model="longitude"
+								label="Longitude"
+								type="number"
+								step="0.000001"
+								placeholder="106.8456"
+								required
+							/>
+						</div>
 					</div>
 
 					<flux:input
@@ -241,24 +255,38 @@
 						required
 					/>
 
-					<div class="grid grid-cols-2 gap-4">
-						<flux:input
-							wire:model="latitude"
-							label="Latitude"
-							type="number"
-							step="0.000001"
-							placeholder="-6.2088"
-							required
-						/>
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<label class="text-sm font-medium text-zinc-700">Koordinat Lokasi</label>
+							<flux:button 
+								x-on:click="getCurrentLocation()" 
+								size="sm" 
+								variant="outline" 
+								icon="map-pin"
+								title="Gunakan lokasi saat ini"
+							>
+								Gunakan Lokasi Disini
+							</flux:button>
+						</div>
+						<div class="grid grid-cols-2 gap-4">
+							<flux:input
+								wire:model="latitude"
+								label="Latitude"
+								type="number"
+								step="0.000001"
+								placeholder="-6.2088"
+								required
+							/>
 
-						<flux:input
-							wire:model="longitude"
-							label="Longitude"
-							type="number"
-							step="0.000001"
-							placeholder="106.8456"
-							required
-						/>
+							<flux:input
+								wire:model="longitude"
+								label="Longitude"
+								type="number"
+								step="0.000001"
+								placeholder="106.8456"
+								required
+							/>
+						</div>
 					</div>
 
 					<flux:input
@@ -348,6 +376,64 @@
 
 	@once
 		<script>
+			// Geolocation function
+			function getCurrentLocation() {
+				if (!navigator.geolocation) {
+					alert('Geolocation tidak didukung oleh browser ini.');
+					return;
+				}
+
+				// Show loading state
+				const button = event.target.closest('button');
+				const originalText = button.innerHTML;
+				button.innerHTML = '<span class="flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Mendapatkan Lokasi...</span>';
+				button.disabled = true;
+
+				navigator.geolocation.getCurrentPosition(
+					function(position) {
+						const latitude = position.coords.latitude;
+						const longitude = position.coords.longitude;
+						
+						// Update Livewire properties
+						Livewire.find(button.closest('[wire\\:id]').getAttribute('wire:id'))?.call('setCurrentLocation', latitude, longitude);
+						
+						// Restore button
+						button.innerHTML = originalText;
+						button.disabled = false;
+					},
+					function(error) {
+						let message = 'Gagal mendapatkan lokasi: ';
+						switch(error.code) {
+							case error.PERMISSION_DENIED:
+								message += 'Akses lokasi ditolak oleh pengguna.';
+								break;
+							case error.POSITION_UNAVAILABLE:
+								message += 'Informasi lokasi tidak tersedia.';
+								break;
+							case error.TIMEOUT:
+								message += 'Permintaan lokasi timeout.';
+								break;
+							default:
+								message += 'Error tidak diketahui.';
+								break;
+						}
+						alert(message);
+						
+						// Restore button
+						button.innerHTML = originalText;
+						button.disabled = false;
+					},
+					{
+						enableHighAccuracy: true,
+						timeout: 10000,
+						maximumAge: 0
+					}
+				);
+			}
+
+			// Make function globally available
+			window.getCurrentLocation = getCurrentLocation;
+
 			document.addEventListener('alpine:init', () => {
 				window.leafletMap = ({ lat, lng, bindTo }) => ({
 					map: null,

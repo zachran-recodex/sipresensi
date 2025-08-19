@@ -17,6 +17,17 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('settings.password');
 
+    // Face Recognition routes
+    Route::get('face/enrollment', function () {
+        return view('face.enrollment');
+    })->name('face.enrollment');
+    Route::get('attendance/check-in', function () {
+        return view('attendance.check-in');
+    })->name('attendance.check-in');
+    Route::get('attendance/check-out', function () {
+        return view('attendance.check-out');
+    })->name('attendance.check-out');
+
     // Administrator routes
     Route::middleware(['role:super admin|admin'])->group(function () {
         Route::get('administrator/manage-users', \App\Livewire\Administrator\ManageUsers::class)->name('administrator.manage-users');

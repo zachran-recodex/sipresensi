@@ -182,4 +182,19 @@ class ManageLocations extends Component
         // Reset form when modal is closed
         $this->resetForm();
     }
+
+    public function useCurrentLocation(): void
+    {
+        // This method will be called from JavaScript after getting geolocation
+        // The actual coordinates will be set via JavaScript
+        $this->dispatch('get-current-location');
+    }
+
+    public function setCurrentLocation($latitude, $longitude): void
+    {
+        $this->latitude = number_format($latitude, 6, '.', '');
+        $this->longitude = number_format($longitude, 6, '.', '');
+
+        session()->flash('message', 'Lokasi saat ini berhasil digunakan!');
+    }
 }
