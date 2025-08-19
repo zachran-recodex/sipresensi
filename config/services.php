@@ -41,4 +41,12 @@ return [
         'gallery_id' => env('BIZNET_FACE_GALLERY_ID'),
     ],
 
+    'admin_contact' => [
+        'email' => env('ADMIN_CONTACT_EMAIL', 'admin@company.com'),
+        'phone' => env('ADMIN_CONTACT_PHONE', '+62 123-456-7890'),
+        'whatsapp' => env('ADMIN_CONTACT_WHATSAPP'),
+        'department' => env('ADMIN_CONTACT_DEPARTMENT', 'IT Support / HR'),
+        'name' => env('ADMIN_CONTACT_NAME', 'Administrator'),
+    ],
+
 ];

@@ -39,9 +39,57 @@
             <flux:text class="text-gray-600">
                 Wajah Anda sudah terdaftar dalam sistem. Anda dapat menggunakan fitur absensi face recognition.
             </flux:text>
-            <flux:button wire:click="reenrollFace" variant="outline" icon="arrow-path">
-                Daftar Ulang Wajah
-            </flux:button>
+
+            <!-- Re-enrollment Information -->
+            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <div class="flex items-start space-x-3">
+                    <flux:icon name="information-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <div class="text-left">
+                        <flux:heading size="sm" class="text-orange-800 mb-2">
+                            Ingin Mendaftarkan Ulang Wajah?
+                        </flux:heading>
+                        <flux:text class="text-sm text-orange-700">
+                            Jika Anda ingin mendaftarkan ulang wajah karena perubahan penampilan atau masalah pengenalan, 
+                            silahkan hubungi administrator sistem untuk bantuan.
+                        </flux:text>
+                        <div class="mt-3 pt-2 border-t border-orange-200">
+                            <flux:text class="text-sm font-medium text-orange-800">
+                                Kontak {{ config('services.admin_contact.name') }}:
+                            </flux:text>
+                            <ul class="text-sm text-orange-700 mt-1 space-y-1">
+                                @if (config('services.admin_contact.email'))
+                                    <li>📧 Email: 
+                                        <a href="mailto:{{ config('services.admin_contact.email') }}" 
+                                           class="underline hover:text-orange-900">
+                                            {{ config('services.admin_contact.email') }}
+                                        </a>
+                                    </li>
+                                @endif
+                                @if (config('services.admin_contact.whatsapp') ?: config('services.admin_contact.phone'))
+                                    <li>📱 WhatsApp: 
+                                        <a href="https://wa.me/{{ str_replace(['+', ' ', '-'], '', config('services.admin_contact.whatsapp') ?: config('services.admin_contact.phone')) }}" 
+                                           target="_blank" 
+                                           class="underline hover:text-orange-900">
+                                            {{ config('services.admin_contact.whatsapp') ?: config('services.admin_contact.phone') }}
+                                        </a>
+                                    </li>
+                                @endif
+                                @if (config('services.admin_contact.department'))
+                                    <li>🏢 Bagian: {{ config('services.admin_contact.department') }}</li>
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start Button -->
+            <div class="flex justify-center space-x-3">
+                <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate>
+                    <flux:icon name="arrow-right-on-rectangle" class="mr-2" />
+                    Mulai Absensi
+                </flux:button>
+            </div>
         </div>
     @endif
 
@@ -127,12 +175,17 @@
                 Sekarang Anda dapat menggunakan face recognition untuk absensi.
             </flux:text>
 
-            <div class="flex justify-center gap-4 mt-6">
+            <!-- Re-enrollment Information -->
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 max-w-md mx-auto">
+                <flux:text class="text-sm text-blue-700">
+                    💡 <strong>Tips:</strong> Jika suatu saat wajah tidak bisa dikenali atau Anda ingin mendaftarkan ulang, 
+                    hubungi <strong>{{ config('services.admin_contact.name') }}</strong> untuk bantuan.
+                </flux:text>
+            </div>
+
+            <div class="flex justify-center mt-6">
                 <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate icon="arrow-right-circle">
                     Mulai Absensi
-                </flux:button>
-                <flux:button wire:click="reenrollFace" variant="outline" icon="arrow-path">
-                    Daftar Ulang
                 </flux:button>
             </div>
         </div>
