@@ -26,6 +26,7 @@ class AttendanceRecord extends Model
             'confidence_level' => 'decimal:4',
             'mask_detected' => 'boolean',
             'face_api_response' => 'array',
+            'location' => 'array',
         ];
     }
 

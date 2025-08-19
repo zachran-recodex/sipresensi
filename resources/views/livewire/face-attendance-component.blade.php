@@ -20,6 +20,110 @@
         </flux:text>
     </div>
 
+    {{-- Today's Attendance Summary --}}
+    @if (!empty($todaysAttendance) && ($todaysAttendance['check_in'] || $todaysAttendance['check_out']))
+        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+            <flux:heading size="sm" class="text-blue-800 mb-2">Absensi Hari Ini</flux:heading>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="flex items-center space-x-2">
+                    <flux:icon name="arrow-right-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_in'] ? ($isLateCheckIn ? 'text-red-600' : 'text-green-600') : 'text-gray-400' }}" />
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-700">Check In</div>
+                        @if ($todaysAttendance['check_in'])
+                            <div class="{{ $this->getCheckInTimeClass() }}">
+                                {{ $todaysAttendance['check_in']->recorded_at->format('H:i:s') }}
+                                <span class="text-xs">{{ $this->getCheckInStatusMessage() }}</span>
+                            </div>
+                        @else
+                            <div class="text-gray-500 text-sm">Belum absen</div>
+                        @endif
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <flux:icon name="arrow-left-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_out'] ? ($isEarlyCheckOut ? 'text-red-600' : 'text-blue-600') : 'text-gray-400' }}" />
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-700">Check Out</div>
+                        @if ($todaysAttendance['check_out'])
+                            <div class="{{ $this->getCheckOutTimeClass() }}">
+                                {{ $todaysAttendance['check_out']->recorded_at->format('H:i:s') }}
+                                <span class="text-xs">{{ $this->getCheckOutStatusMessage() }}</span>
+                            </div>
+                        @else
+                            <div class="text-gray-500 text-sm">Belum absen</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($attendanceStatus === 'complete')
+        <div class="text-center space-y-4">
+            <flux:icon name="check-circle" class="w-16 h-16 text-green-500 mx-auto" />
+            <flux:heading size="md" class="text-green-600">
+                Absensi Hari Ini Sudah Lengkap
+            </flux:heading>
+            <flux:text class="text-gray-600">
+                Anda sudah melakukan check in dan check out hari ini. Sampai jumpa besok!
+            </flux:text>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700">Check In:</span>
+                        <div class="{{ $this->getCheckInTimeClass() }} text-sm">
+                            {{ $todaysAttendance['check_in']->recorded_at->format('H:i:s') }}
+                            <span class="text-xs ml-1">{{ $this->getCheckInStatusMessage() }}</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700">Check Out:</span>
+                        <div class="{{ $this->getCheckOutTimeClass() }} text-sm">
+                            {{ $todaysAttendance['check_out']->recorded_at->format('H:i:s') }}
+                            <span class="text-xs ml-1">{{ $this->getCheckOutStatusMessage() }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($attendanceStatus === 'already_checked_in')
+        <div class="text-center space-y-4">
+            <flux:icon name="exclamation-triangle" class="w-16 h-16 text-orange-500 mx-auto" />
+            <flux:heading size="md" class="text-orange-600">
+                Sudah Check In
+            </flux:heading>
+            <flux:text class="text-gray-600">
+                Anda sudah check in hari ini pada 
+                <span class="{{ $this->getCheckInTimeClass() }}">
+                    {{ $todaysAttendance['check_in']->recorded_at->format('H:i:s') }}
+                </span>
+                <span class="text-sm">{{ $this->getCheckInStatusMessage() }}</span>.
+                <br>Silahkan lakukan check out jika sudah selesai bekerja.
+            </flux:text>
+            <flux:button :href="route('attendance.check-out')" variant="primary" wire:navigate>
+                <flux:icon name="arrow-left-on-rectangle" class="mr-2" />
+                Check Out Sekarang
+            </flux:button>
+        </div>
+    @endif
+
+    @if ($attendanceStatus === 'no_check_in')
+        <div class="text-center space-y-4">
+            <flux:icon name="exclamation-triangle" class="w-16 h-16 text-red-500 mx-auto" />
+            <flux:heading size="md" class="text-red-600">
+                Tidak Ada Check In
+            </flux:heading>
+            <flux:text class="text-gray-600">
+                Anda belum check in hari ini. Lakukan check in terlebih dahulu sebelum check out.
+            </flux:text>
+            <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate>
+                <flux:icon name="arrow-right-on-rectangle" class="mr-2" />
+                Check In Sekarang
+            </flux:button>
+        </div>
+    @endif
+
     @if ($attendanceStatus === 'not_enrolled')
         <div class="text-center space-y-4">
             <flux:icon name="exclamation-triangle" class="w-16 h-16 text-orange-500 mx-auto" />
@@ -255,18 +359,77 @@
         });
     });
 
+    // Get user location
+    function getUserLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject('Geolocation tidak didukung browser ini');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    console.log('Location obtained:', latitude, longitude);
+
+                    // Send location to Livewire
+                    $wire.call('setUserLocation', latitude, longitude);
+                    resolve({ latitude, longitude });
+                },
+                error => {
+                    let message = 'Gagal mendapatkan lokasi: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += 'Akses lokasi ditolak';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += 'Informasi lokasi tidak tersedia';
+                            break;
+                        case error.TIMEOUT:
+                            message += 'Request lokasi timeout';
+                            break;
+                        default:
+                            message += 'Error tidak diketahui';
+                            break;
+                    }
+                    reject(message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 60000
+                }
+            );
+        });
+    }
+
     // Listen for attendance camera started event
     $wire.on('attendance-camera-started', () => {
         console.log('Attendance camera-started event received');
-        setTimeout(() => {
-            console.log('Starting attendance camera...');
-            startAttendanceCamera();
-        }, 200);
+
+        // Get location first, then start camera
+        getUserLocation()
+            .then(() => {
+                console.log('Location obtained, starting camera...');
+                setTimeout(startAttendanceCamera, 200);
+            })
+            .catch(error => {
+                console.warn('Location error:', error);
+                // Start camera anyway, but location validation might fail
+                setTimeout(startAttendanceCamera, 200);
+            });
     });
 
     // Also try to start camera when page refreshes and conditions are met
     document.addEventListener('livewire:init', () => {
         console.log('Attendance Livewire initialized');
+
+        // Get location on page load
+        getUserLocation().catch(error => {
+            console.warn('Initial location detection failed:', error);
+        });
+
         // Check if camera should be shown on initial load
         if (document.getElementById('attendance-camera-preview')) {
             setTimeout(startAttendanceCamera, 300);
