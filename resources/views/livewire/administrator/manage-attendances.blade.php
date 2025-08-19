@@ -1,13 +1,13 @@
 <div x-data="{}">
     <div class="space-y-6">
         <!-- Header -->
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
             <div>
                 <flux:heading size="xl">Kelola Pengaturan Kehadiran</flux:heading>
                 <flux:subheading>Atur lokasi, jam kerja, dan hari kerja untuk karyawan</flux:subheading>
             </div>
-            <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-attendance').show()" variant="primary" icon="plus">
-                Tambah
+            <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-attendance').show()" variant="primary" icon="plus" class="w-full md:w-auto">
+                Tambah Pengaturan
             </flux:button>
         </div>
 
@@ -25,28 +25,32 @@
         @endif
 
         <!-- Filters -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <flux:input
-                wire:model.live="search"
-                placeholder="Cari berdasarkan nama, username, atau email karyawan..."
-                icon="magnifying-glass"
-            />
-            <flux:select wire:model.live="locationFilter" placeholder="Filter berdasarkan lokasi">
-                <flux:select.option value="">Semua Lokasi</flux:select.option>
-                @foreach($locations as $location)
-                    <flux:select.option value="{{ $location->id }}">{{ $location->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
-            <flux:select wire:model.live="statusFilter" placeholder="Filter berdasarkan status">
-                <flux:select.option value="">Semua Status</flux:select.option>
-                <flux:select.option value="active">Aktif</flux:select.option>
-                <flux:select.option value="inactive">Tidak Aktif</flux:select.option>
-            </flux:select>
+        <div class="bg-white p-4 rounded-lg border border-gray-200">
+            <flux:heading size="sm" class="mb-3">Filter & Pencarian</flux:heading>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <flux:input
+                    wire:model.live="search"
+                    placeholder="Cari berdasarkan nama, username, atau email karyawan..."
+                    icon="magnifying-glass"
+                />
+                <flux:select wire:model.live="locationFilter" placeholder="Filter berdasarkan lokasi">
+                    <flux:select.option value="">Semua Lokasi</flux:select.option>
+                    @foreach($locations as $location)
+                        <flux:select.option value="{{ $location->id }}">{{ $location->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:select wire:model.live="statusFilter" placeholder="Filter berdasarkan status">
+                    <flux:select.option value="">Semua Status</flux:select.option>
+                    <flux:select.option value="active">Aktif</flux:select.option>
+                    <flux:select.option value="inactive">Tidak Aktif</flux:select.option>
+                </flux:select>
+            </div>
         </div>
 
         <!-- Attendances Table -->
-        <div class="overflow-hidden bg-white shadow sm:rounded-lg border-zinc-200">
-            <table class="min-w-full divide-y divide-zinc-200">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-zinc-200">
                 <thead class="bg-zinc-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
@@ -108,12 +112,14 @@
                                 </flux:badge>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center gap-2 justify-end">
-                                    <flux:button x-on:click="$wire.setEditAttendance({{ $attendance->id }}); $flux.modal('edit-attendance').show()" size="sm" variant="ghost" icon="pencil">
-                                        Edit
+                                <div class="flex flex-col md:flex-row items-end md:items-center gap-2 justify-end">
+                                    <flux:button x-on:click="$wire.setEditAttendance({{ $attendance->id }}); $flux.modal('edit-attendance').show()" size="sm" variant="ghost" icon="pencil" class="w-full md:w-auto">
+                                        <span class="md:hidden">Edit {{ $attendance->user->name }}</span>
+                                        <span class="hidden md:inline">Edit</span>
                                     </flux:button>
-                                    <flux:button x-on:click="$wire.setDeleteAttendance({{ $attendance->id }}); $flux.modal('delete-attendance').show()" size="sm" variant="danger" icon="trash">
-                                        Hapus
+                                    <flux:button x-on:click="$wire.setDeleteAttendance({{ $attendance->id }}); $flux.modal('delete-attendance').show()" size="sm" variant="danger" icon="trash" class="w-full md:w-auto">
+                                        <span class="md:hidden">Hapus {{ $attendance->user->name }}</span>
+                                        <span class="hidden md:inline">Hapus</span>
                                     </flux:button>
                                 </div>
                             </td>
@@ -130,7 +136,8 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
+                </table>
+            </div>
         </div>
 
         <!-- Pagination -->
@@ -140,7 +147,7 @@
     </div>
 
     <!-- Create Attendance Modal -->
-    <flux:modal name="create-attendance" class="md:w-[40rem]">
+    <flux:modal name="create-attendance" class="w-full max-w-3xl mx-4">
         <form wire:submit.prevent="createAttendance" class="space-y-6">
             <div>
                 <flux:heading size="lg">Buat Pengaturan Kehadiran Baru</flux:heading>
@@ -223,7 +230,7 @@
     </flux:modal>
 
     <!-- Edit Attendance Modal -->
-    <flux:modal name="edit-attendance" class="md:w-[40rem]">
+    <flux:modal name="edit-attendance" class="w-full max-w-3xl mx-4">
         <form wire:submit.prevent="updateAttendance" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Pengaturan Kehadiran</flux:heading>
@@ -306,7 +313,7 @@
     </flux:modal>
 
     <!-- Delete Attendance Modal -->
-    <flux:modal name="delete-attendance" class="md:w-[28rem]">
+    <flux:modal name="delete-attendance" class="w-full max-w-lg mx-4">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Hapus Pengaturan Kehadiran</flux:heading>

@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
         <div>
             <flux:heading size="xl">Laporan Absensi</flux:heading>
             <flux:subheading>Monitor dan analisis data kehadiran karyawan</flux:subheading>
@@ -87,13 +87,16 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <!-- Search -->
-            <flux:input
-                wire:model.live.debounce.300ms="search"
-                placeholder="Cari nama, username, email..."
-                clearable
-            />
+            <div class="sm:col-span-2 xl:col-span-1">
+                <flux:input
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari nama, username, email..."
+                    clearable
+                    icon="magnifying-glass"
+                />
+            </div>
 
             <!-- User Filter -->
             <flux:select wire:model.live="selectedUser" placeholder="Pilih Karyawan">
@@ -108,12 +111,14 @@
                 type="date"
                 wire:model.live="startDate"
                 placeholder="Tanggal Mulai"
+                label="Tanggal Mulai"
             />
 
             <flux:input
                 type="date"
                 wire:model.live="endDate"
                 placeholder="Tanggal Selesai"
+                label="Tanggal Selesai"
             />
 
             <!-- Type Filter -->

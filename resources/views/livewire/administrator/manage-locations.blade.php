@@ -1,13 +1,13 @@
 <div x-data="{}">
 	<div class="space-y-6">
 		<!-- Header -->
-		<div class="flex justify-between items-center">
+		<div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
 			<div>
 				<flux:heading size="xl">Kelola Lokasi</flux:heading>
 				<flux:subheading>Buat, edit, hapus lokasi dan kelola status mereka</flux:subheading>
 			</div>
-			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus">
-				Tambah
+			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus" class="w-full md:w-auto">
+				Tambah Lokasi
 			</flux:button>
 		</div>
 
@@ -25,22 +25,26 @@
 		@endif
 
 		<!-- Filters -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<flux:input
-				wire:model.live="search"
-				placeholder="Cari lokasi berdasarkan nama atau alamat..."
-				icon="magnifying-glass"
-			/>
-			<flux:select wire:model.live="statusFilter" placeholder="Filter berdasarkan status">
-				<flux:select.option value="">Semua Status</flux:select.option>
-				<flux:select.option value="active">Aktif</flux:select.option>
-				<flux:select.option value="inactive">Tidak Aktif</flux:select.option>
-			</flux:select>
+		<div class="bg-white p-4 rounded-lg border border-gray-200">
+			<flux:heading size="sm" class="mb-3">Filter & Pencarian</flux:heading>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<flux:input
+					wire:model.live="search"
+					placeholder="Cari lokasi berdasarkan nama atau alamat..."
+					icon="magnifying-glass"
+				/>
+				<flux:select wire:model.live="statusFilter" placeholder="Filter berdasarkan status">
+					<flux:select.option value="">Semua Status</flux:select.option>
+					<flux:select.option value="active">Aktif</flux:select.option>
+					<flux:select.option value="inactive">Tidak Aktif</flux:select.option>
+				</flux:select>
+			</div>
 		</div>
 
 		<!-- Locations Table -->
-		<div class="overflow-hidden bg-white shadow sm:rounded-lg border-zinc-200">
-			<table class="min-w-full divide-y divide-zinc-200">
+		<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+			<div class="overflow-x-auto">
+				<table class="min-w-full divide-y divide-zinc-200">
 				<thead class="bg-zinc-50">
 					<tr>
 						<th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
@@ -93,12 +97,14 @@
 								</flux:badge>
 							</td>
 							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-								<div class="flex items-center gap-2 justify-end">
-									<flux:button x-on:click="$wire.setEditLocation({{ $location->id }}); $flux.modal('edit-location').show()" size="sm" variant="ghost" icon="pencil">
-										Edit
+								<div class="flex flex-col md:flex-row items-end md:items-center gap-2 justify-end">
+									<flux:button x-on:click="$wire.setEditLocation({{ $location->id }}); $flux.modal('edit-location').show()" size="sm" variant="ghost" icon="pencil" class="w-full md:w-auto">
+										<span class="md:hidden">Edit {{ $location->name }}</span>
+										<span class="hidden md:inline">Edit</span>
 									</flux:button>
-									<flux:button x-on:click="$wire.setDeleteLocation({{ $location->id }}); $flux.modal('delete-location').show()" size="sm" variant="danger" icon="trash">
-										Hapus
+									<flux:button x-on:click="$wire.setDeleteLocation({{ $location->id }}); $flux.modal('delete-location').show()" size="sm" variant="danger" icon="trash" class="w-full md:w-auto">
+										<span class="md:hidden">Hapus {{ $location->name }}</span>
+										<span class="hidden md:inline">Hapus</span>
 									</flux:button>
 								</div>
 							</td>
@@ -115,7 +121,8 @@
 						</tr>
 					@endforelse
 				</tbody>
-			</table>
+				</table>
+			</div>
 		</div>
 
 		<!-- Pagination -->
@@ -125,7 +132,7 @@
 	</div>
 
 	<!-- Create Location Modal -->
-	<flux:modal name="create-location" class="min-w-4xl">
+	<flux:modal name="create-location" class="w-full max-w-6xl mx-4">
 		<form wire:submit.prevent="createLocation" class="space-y-6">
 			<div>
 				<flux:heading size="lg">Buat Lokasi Baru</flux:heading>
@@ -230,7 +237,7 @@
 	</flux:modal>
 
 	<!-- Edit Location Modal -->
-	<flux:modal name="edit-location" class="min-w-4xl">
+	<flux:modal name="edit-location" class="w-full max-w-6xl mx-4">
 		<form wire:submit.prevent="updateLocation" class="space-y-6">
 			<div>
 				<flux:heading size="lg">Edit Lokasi</flux:heading>
@@ -335,7 +342,7 @@
 	</flux:modal>
 
 	<!-- Delete Location Modal -->
-	<flux:modal name="delete-location" class="md:w-[32rem]">
+	<flux:modal name="delete-location" class="w-full max-w-lg mx-4">
 		<div class="space-y-6">
 			<div>
 				<flux:heading size="lg">Hapus Lokasi</flux:heading>
