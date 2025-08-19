@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\BiznetFaceService;
+use App\Services\FaceRecognitionService;
 use Illuminate\Console\Command;
 
 class CreateFaceGallery extends Command
@@ -31,7 +31,7 @@ class CreateFaceGallery extends Command
         $this->info("Creating face gallery: {$galleryId}");
 
         try {
-            $service = app(BiznetFaceService::class);
+            $service = app(FaceRecognitionService::class);
 
             // First check existing galleries
             $this->info('Checking existing galleries...');

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class BiznetFaceService
+class FaceRecognitionService
 {
     protected string $apiUrl;
 

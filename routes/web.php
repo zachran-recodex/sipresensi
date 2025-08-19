@@ -11,22 +11,24 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('settings.password');
 
-    // Face Recognition routes
-    Route::get('face/enrollment', function () {
-        return view('face.enrollment');
-    })->name('face.enrollment');
-    Route::get('attendance/check-in', function () {
-        return view('attendance.check-in');
-    })->name('attendance.check-in');
-    Route::get('attendance/check-out', function () {
-        return view('attendance.check-out');
-    })->name('attendance.check-out');
+    // Employee routes
+    Route::middleware(['role:super admin|karyawan'])->group(function () {
+        Route::get('face/enrollment', function () {
+            return view('face.enrollment');
+        })->name('face.enrollment');
+        Route::get('attendance/check-in', function () {
+            return view('attendance.check-in');
+        })->name('attendance.check-in');
+        Route::get('attendance/check-out', function () {
+            return view('attendance.check-out');
+        })->name('attendance.check-out');
+    });
 
     // Administrator routes
     Route::middleware(['role:super admin|admin'])->group(function () {

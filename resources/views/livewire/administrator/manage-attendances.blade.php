@@ -7,21 +7,17 @@
                 <flux:subheading>Atur lokasi, jam kerja, dan hari kerja untuk karyawan</flux:subheading>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-attendance').show()" variant="primary" icon="plus" class="w-full md:w-auto">
-                Tambah Pengaturan
+                Tambah
             </flux:button>
         </div>
 
         <!-- Success/Error Messages -->
         @if (session('message'))
-            <flux:callout variant="success" dismissible>
-                {{ session('message') }}
-            </flux:callout>
+            <flux:callout variant="success" dismissible heading="{{ session('message') }}" />
         @endif
 
         @if (session('error'))
-            <flux:callout variant="danger" dismissible>
-                {{ session('error') }}
-            </flux:callout>
+            <flux:callout variant="danger" dismissible heading="{{ session('message') }}" />
         @endif
 
         <!-- Filters -->
@@ -147,7 +143,7 @@
     </div>
 
     <!-- Create Attendance Modal -->
-    <flux:modal name="create-attendance" class="w-full max-w-3xl mx-4">
+    <flux:modal name="create-attendance" class="w-full max-w-lg mx-auto">
         <form wire:submit.prevent="createAttendance" class="space-y-6">
             <div>
                 <flux:heading size="lg">Buat Pengaturan Kehadiran Baru</flux:heading>
@@ -230,7 +226,7 @@
     </flux:modal>
 
     <!-- Edit Attendance Modal -->
-    <flux:modal name="edit-attendance" class="w-full max-w-3xl mx-4">
+    <flux:modal name="edit-attendance" class="w-full max-w-lg mx-auto">
         <form wire:submit.prevent="updateAttendance" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Pengaturan Kehadiran</flux:heading>
@@ -313,7 +309,7 @@
     </flux:modal>
 
     <!-- Delete Attendance Modal -->
-    <flux:modal name="delete-attendance" class="w-full max-w-lg mx-4">
+    <flux:modal name="delete-attendance" class="w-full max-w-lg mx-auto">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Hapus Pengaturan Kehadiran</flux:heading>

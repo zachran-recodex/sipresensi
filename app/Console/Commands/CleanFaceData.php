@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\FaceEnrollment;
-use App\Services\BiznetFaceService;
+use App\Services\FaceRecognitionService;
 use Illuminate\Console\Command;
 
 class CleanFaceData extends Command
@@ -36,7 +36,7 @@ class CleanFaceData extends Command
         }
 
         try {
-            $service = app(BiznetFaceService::class);
+            $service = app(FaceRecognitionService::class);
 
             // Get all face enrollments
             $enrollments = FaceEnrollment::all();

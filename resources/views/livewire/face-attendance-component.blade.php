@@ -24,15 +24,15 @@
     @if (!empty($todaysAttendance) && ($todaysAttendance['check_in'] || $todaysAttendance['check_out']))
         <div class="bg-blue-50 p-4 rounded-lg mb-6">
             <flux:heading size="sm" class="text-blue-800 mb-2">Absensi Hari Ini</flux:heading>
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div class="flex items-center space-x-2">
-                    <flux:icon name="arrow-right-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_in'] ? ($isLateCheckIn ? 'text-red-600' : 'text-green-600') : 'text-gray-400' }}" />
-                    <div class="flex-1">
+                    <flux:icon name="arrow-right-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_in'] ? ($isLateCheckIn ? 'text-red-600' : 'text-green-600') : 'text-gray-400' }} flex-shrink-0" />
+                    <div class="flex-1 min-w-0">
                         <div class="font-medium text-gray-700">Check In</div>
                         @if ($todaysAttendance['check_in'])
                             <div class="{{ $this->getCheckInTimeClass() }}">
                                 {{ $todaysAttendance['check_in']->recorded_at->format('H:i:s') }}
-                                <span class="text-xs">{{ $this->getCheckInStatusMessage() }}</span>
+                                <span class="text-xs block sm:inline">{{ $this->getCheckInStatusMessage() }}</span>
                             </div>
                         @else
                             <div class="text-gray-500 text-sm">Belum absen</div>
@@ -40,13 +40,13 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <flux:icon name="arrow-left-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_out'] ? ($isEarlyCheckOut ? 'text-red-600' : 'text-blue-600') : 'text-gray-400' }}" />
-                    <div class="flex-1">
+                    <flux:icon name="arrow-left-on-rectangle" class="w-4 h-4 {{ $todaysAttendance['check_out'] ? ($isEarlyCheckOut ? 'text-red-600' : 'text-blue-600') : 'text-gray-400' }} flex-shrink-0" />
+                    <div class="flex-1 min-w-0">
                         <div class="font-medium text-gray-700">Check Out</div>
                         @if ($todaysAttendance['check_out'])
                             <div class="{{ $this->getCheckOutTimeClass() }}">
                                 {{ $todaysAttendance['check_out']->recorded_at->format('H:i:s') }}
-                                <span class="text-xs">{{ $this->getCheckOutStatusMessage() }}</span>
+                                <span class="text-xs block sm:inline">{{ $this->getCheckOutStatusMessage() }}</span>
                             </div>
                         @else
                             <div class="text-gray-500 text-sm">Belum absen</div>
@@ -68,18 +68,18 @@
             </flux:text>
             <div class="bg-green-50 p-4 rounded-lg">
                 <div class="space-y-2">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                         <span class="text-sm font-medium text-gray-700">Check In:</span>
                         <div class="{{ $this->getCheckInTimeClass() }} text-sm">
                             {{ $todaysAttendance['check_in']->recorded_at->format('H:i:s') }}
-                            <span class="text-xs ml-1">{{ $this->getCheckInStatusMessage() }}</span>
+                            <span class="text-xs block sm:inline sm:ml-1">{{ $this->getCheckInStatusMessage() }}</span>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                         <span class="text-sm font-medium text-gray-700">Check Out:</span>
                         <div class="{{ $this->getCheckOutTimeClass() }} text-sm">
                             {{ $todaysAttendance['check_out']->recorded_at->format('H:i:s') }}
-                            <span class="text-xs ml-1">{{ $this->getCheckOutStatusMessage() }}</span>
+                            <span class="text-xs block sm:inline sm:ml-1">{{ $this->getCheckOutStatusMessage() }}</span>
                         </div>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                 <span class="text-sm">{{ $this->getCheckInStatusMessage() }}</span>.
                 <br>Silahkan lakukan check out jika sudah selesai bekerja.
             </flux:text>
-            <flux:button :href="route('attendance.check-out')" variant="primary" wire:navigate>
+            <flux:button :href="route('attendance.check-out')" variant="primary" wire:navigate class="w-full sm:w-auto">
                 <flux:icon name="arrow-left-on-rectangle" class="mr-2" />
                 Check Out Sekarang
             </flux:button>
@@ -117,7 +117,7 @@
             <flux:text class="text-gray-600">
                 Anda belum check in hari ini. Lakukan check in terlebih dahulu sebelum check out.
             </flux:text>
-            <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate>
+            <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate class="w-full sm:w-auto">
                 <flux:icon name="arrow-right-on-rectangle" class="mr-2" />
                 Check In Sekarang
             </flux:button>
@@ -133,7 +133,7 @@
             <flux:text class="text-gray-600">
                 Anda harus mendaftarkan wajah terlebih dahulu sebelum dapat menggunakan absensi face recognition.
             </flux:text>
-            <flux:button :href="route('face.enrollment')" variant="primary" wire:navigate icon="face-id">
+            <flux:button :href="route('face.enrollment')" variant="primary" wire:navigate icon="face-id" class="w-full sm:w-auto">
                 Daftar Wajah Sekarang
             </flux:button>
         </div>
@@ -141,7 +141,7 @@
 
     @if ($attendanceStatus === 'idle')
         <div class="text-center">
-            <flux:button wire:click="startCamera" variant="primary" icon="camera">
+            <flux:button wire:click="startCamera" variant="primary" icon="camera" class="w-full sm:w-auto">
                 Mulai {{ $attendanceType === 'check_in' ? 'Check In' : 'Check Out' }}
             </flux:button>
         </div>
@@ -149,14 +149,14 @@
 
     @if ($showCamera && in_array($attendanceStatus, ['capturing', 'captured']))
         <div class="space-y-4">
-            <div class="relative mx-auto w-96 h-72 bg-gray-200 rounded-lg overflow-hidden">
+            <div class="relative mx-auto w-full max-w-md h-64 sm:w-96 sm:h-72 bg-gray-200 rounded-lg overflow-hidden">
                 @if ($attendanceStatus === 'capturing')
                     <video id="attendance-camera-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
                     <div class="absolute inset-0 border-4 border-dashed border-green-500 rounded-lg pointer-events-none"></div>
 
                     <!-- Face guide overlay -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-48 h-64 border-2 border-white rounded-full opacity-50"></div>
+                        <div class="w-36 h-48 sm:w-48 sm:h-64 border-2 border-white rounded-full opacity-50"></div>
                     </div>
 
                     <!-- Live feedback -->
@@ -172,15 +172,15 @@
                 @endif
             </div>
 
-            <div class="flex justify-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 @if ($attendanceStatus === 'capturing')
-                    <flux:button id="attendance-capture-btn" variant="primary" onclick="captureAttendanceImage()" icon="camera">
+                    <flux:button id="attendance-capture-btn" variant="primary" onclick="captureAttendanceImage()" icon="camera" class="w-full sm:w-auto">
                         Ambil Foto
                     </flux:button>
                 @endif
 
                 @if ($attendanceStatus === 'captured')
-                    <flux:button wire:click="retake" variant="outline" icon="arrow-path">
+                    <flux:button wire:click="retake" variant="outline" icon="arrow-path" class="w-full sm:w-auto">
                         Ambil Ulang
                     </flux:button>
 
@@ -188,6 +188,7 @@
                         wire:click="processAttendance"
                         variant="primary"
                         :disabled="$attendanceStatus === 'processing'"
+                        class="w-full sm:w-auto"
                     >
                         <span wire:loading.remove wire:target="processAttendance">
                             Proses Absensi
@@ -228,7 +229,7 @@
                 @endif
             </div>
 
-            <flux:button wire:click="resetComponent" variant="outline" class="mt-4" icon="arrow-path">
+            <flux:button wire:click="resetComponent" variant="outline" class="mt-4 w-full sm:w-auto" icon="arrow-path">
                 Absensi Lagi
             </flux:button>
         </div>

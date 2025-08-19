@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\FaceEnrollment;
-use App\Services\BiznetFaceService;
+use App\Services\FaceRecognitionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -26,7 +26,7 @@ class FaceEnrollmentComponent extends Component
 
     public function boot(): void
     {
-        $this->biznetFaceService = app(BiznetFaceService::class);
+        $this->biznetFaceService = app(FaceRecognitionService::class);
     }
 
     public function mount($userId = null, $userName = null): void
@@ -86,7 +86,7 @@ class FaceEnrollmentComponent extends Component
             }
 
             // Validate image quality
-            if (! BiznetFaceService::validateBase64Image($imageData)) {
+            if (! FaceRecognitionService::validateBase64Image($imageData)) {
                 throw new \Exception('Kualitas gambar tidak memenuhi syarat');
             }
 
@@ -110,7 +110,7 @@ class FaceEnrollmentComponent extends Component
                 throw new \Exception('Tidak ada gambar yang ditangkap');
             }
 
-            if (! BiznetFaceService::validateBase64Image($this->capturedImage)) {
+            if (! FaceRecognitionService::validateBase64Image($this->capturedImage)) {
                 throw new \Exception('Gambar tidak valid');
             }
 

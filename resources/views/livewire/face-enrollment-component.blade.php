@@ -42,7 +42,7 @@
 
             <!-- Re-enrollment Information -->
             <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                <div class="flex items-start space-x-3">
+                <div class="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-3">
                     <flux:icon name="information-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                     <div class="text-left">
                         <flux:heading size="sm" class="text-orange-800 mb-2">
@@ -60,7 +60,7 @@
                                 @if (config('services.admin_contact.email'))
                                     <li>📧 Email: 
                                         <a href="mailto:{{ config('services.admin_contact.email') }}" 
-                                           class="underline hover:text-orange-900">
+                                           class="underline hover:text-orange-900 break-words">
                                             {{ config('services.admin_contact.email') }}
                                         </a>
                                     </li>
@@ -69,7 +69,7 @@
                                     <li>📱 WhatsApp: 
                                         <a href="https://wa.me/{{ str_replace(['+', ' ', '-'], '', config('services.admin_contact.whatsapp') ?: config('services.admin_contact.phone')) }}" 
                                            target="_blank" 
-                                           class="underline hover:text-orange-900">
+                                           class="underline hover:text-orange-900 break-words">
                                             {{ config('services.admin_contact.whatsapp') ?: config('services.admin_contact.phone') }}
                                         </a>
                                     </li>
@@ -84,8 +84,8 @@
             </div>
 
             <!-- Quick Start Button -->
-            <div class="flex justify-center space-x-3">
-                <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate>
+            <div class="flex justify-center">
+                <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate class="w-full sm:w-auto">
                     <flux:icon name="arrow-right-on-rectangle" class="mr-2" />
                     Mulai Absensi
                 </flux:button>
@@ -95,7 +95,7 @@
 
     @if ($enrollmentStatus === 'idle')
         <div class="text-center">
-            <flux:button wire:click="startCamera" variant="primary" icon="camera">
+            <flux:button wire:click="startCamera" variant="primary" icon="camera" class="w-full sm:w-auto">
                 Mulai Kamera
             </flux:button>
         </div>
@@ -103,14 +103,14 @@
 
     @if ($showCamera && in_array($enrollmentStatus, ['capturing', 'captured']))
         <div class="space-y-4">
-            <div class="relative mx-auto w-96 h-72 bg-gray-200 rounded-lg overflow-hidden">
+            <div class="relative mx-auto w-full max-w-md h-64 sm:w-96 sm:h-72 bg-gray-200 rounded-lg overflow-hidden">
                 @if ($enrollmentStatus === 'capturing')
                     <video id="camera-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
                     <div class="absolute inset-0 border-4 border-dashed border-blue-500 rounded-lg pointer-events-none"></div>
 
                     <!-- Face guide overlay -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="w-48 h-64 border-2 border-white rounded-full opacity-50"></div>
+                        <div class="w-36 h-48 sm:w-48 sm:h-64 border-2 border-white rounded-full opacity-50"></div>
                     </div>
 
                     <!-- Live feedback -->
@@ -133,18 +133,18 @@
                 @endif
             </div>
 
-            <div class="flex justify-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                 @if ($enrollmentStatus === 'capturing')
-                    <flux:button id="capture-btn" variant="primary" icon="camera" onclick="captureImage()">
+                    <flux:button id="capture-btn" variant="primary" icon="camera" onclick="captureImage()" class="w-full sm:w-auto">
                         Ambil Foto
                     </flux:button>
-                    <flux:button wire:click="startCamera" variant="outline" icon="arrow-path">
+                    <flux:button wire:click="startCamera" variant="outline" icon="arrow-path" class="w-full sm:w-auto">
                         Mulai Ulang
                     </flux:button>
                 @endif
 
                 @if ($enrollmentStatus === 'captured')
-                    <flux:button wire:click="retake" variant="outline" icon="arrow-path">
+                    <flux:button wire:click="retake" variant="outline" icon="arrow-path" class="w-full sm:w-auto">
                         Ambil Ulang
                     </flux:button>
 
@@ -152,6 +152,7 @@
                         wire:click="enrollFace"
                         variant="primary"
                         :disabled="$enrollmentStatus === 'enrolling'"
+                        class="w-full sm:w-auto"
                     >
                         <span wire:loading.remove wire:target="enrollFace" icon="check">
                             Daftarkan Wajah
@@ -184,7 +185,7 @@
             </div>
 
             <div class="flex justify-center mt-6">
-                <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate icon="arrow-right-circle">
+                <flux:button :href="route('attendance.check-in')" variant="primary" wire:navigate icon="arrow-right-circle" class="w-full sm:w-auto">
                     Mulai Absensi
                 </flux:button>
             </div>

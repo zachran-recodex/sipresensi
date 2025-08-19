@@ -19,25 +19,23 @@ class DatabaseSeeder extends Seeder
         // Call location seeder
         $this->call(LocationSeeder::class);
 
-        // User::factory(10)->create();
-
         // Create test users with roles
         $superAdmin = User::factory()->create([
-            'name' => 'Super Admin',
-            'username' => 'superadmin',
-            'email' => 'superadmin@example.com',
+            'name' => 'Zachran Razendra',
+            'username' => 'zachranraze',
+            'email' => 'zachranraze@recodex.id',
         ]);
         $superAdmin->assignRole('super admin');
 
         $admin = User::factory()->create([
-            'name' => 'Admin User',
+            'name' => 'Ini Admin',
             'username' => 'admin',
             'email' => 'admin@example.com',
         ]);
         $admin->assignRole('admin');
 
         $karyawan = User::factory()->create([
-            'name' => 'Karyawan User',
+            'name' => 'Ini Karyawan',
             'username' => 'karyawan',
             'email' => 'karyawan@example.com',
         ]);

@@ -4,10 +4,10 @@
         <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
             <div>
                 <flux:heading size="xl">Kelola Pengguna</flux:heading>
-                <flux:subheading>Buat, edit, hapus pengguna dan kelola peran mereka</flux:subheading>
+                <flux:subheading>Buat, edit, hapus pengguna dan kelola role mereka</flux:subheading>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-user').show()" variant="primary" icon="plus" class="w-full md:w-auto">
-                Tambah Pengguna
+                Tambah
             </flux:button>
         </div>
 
@@ -33,36 +33,32 @@
 
         <!-- Success/Error Messages -->
         @if (session('message'))
-            <flux:callout variant="success" dismissible>
-                {{ session('message') }}
-            </flux:callout>
+            <flux:callout variant="success" dismissible heading="{{ session('message') }}" />
         @endif
 
         @if (session('error'))
-            <flux:callout variant="danger" dismissible>
-                {{ session('error') }}
-            </flux:callout>
+            <flux:callout variant="danger" dismissible heading="{{ session('message') }}" />
         @endif
 
         <!-- Filters -->
-        <div class="bg-white p-4 rounded-lg border border-gray-200">
-            <flux:heading size="sm" class="mb-3">Filter & Pencarian</flux:heading>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <flux:input
-                    wire:model.live="search"
-                    placeholder="Cari pengguna berdasarkan nama, username, atau email..."
-                    icon="magnifying-glass"
-                />
-                @if($viewMode === 'users')
-                    <flux:select wire:model.live="roleFilter" placeholder="Filter berdasarkan peran">
-                        <flux:select.option value="">Semua Peran</flux:select.option>
+        @if($viewMode === 'users')
+            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <flux:heading size="sm" class="mb-3">Filter & Pencarian</flux:heading>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <flux:input
+                        wire:model.live="search"
+                        placeholder="Cari pengguna berdasarkan nama, username, atau email..."
+                        icon="magnifying-glass"
+                    />
+                    <flux:select wire:model.live="roleFilter" placeholder="Filter berdasarkan ">
+                        <flux:select.option value="">Semua Role</flux:select.option>
                         @foreach($roles as $role)
                             <flux:select.option value="{{ $role->name }}">{{ ucfirst($role->name) }}</flux:select.option>
                         @endforeach
                     </flux:select>
-                @endif
+                </div>
             </div>
-        </div>
+        @endif
 
         <!-- Users Table -->
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -77,7 +73,7 @@
                             Username
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                            Peran
+                            Role
                         </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Aksi
@@ -180,7 +176,7 @@
     </div>
 
     <!-- Create User Modal -->
-    <flux:modal name="create-user" class="w-full max-w-2xl mx-4">
+    <flux:modal name="create-user" class="w-full max-w-lg mx-auto">
         <form wire:submit.prevent="createUser" class="space-y-6">
             <div>
                 <flux:heading size="lg">Buat Pengguna Baru</flux:heading>
@@ -225,7 +221,7 @@
                 required
             />
 
-            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Peran">
+            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Role">
                 @foreach($roles as $role)
                     <flux:checkbox
                         value="{{ $role->name }}"
@@ -249,7 +245,7 @@
     </flux:modal>
 
     <!-- Edit User Modal -->
-    <flux:modal name="edit-user" class="w-full max-w-2xl mx-4">
+    <flux:modal name="edit-user" class="w-full max-w-lg mx-auto">
         <form wire:submit.prevent="updateUser" class="space-y-6">
             <div>
                 <flux:heading size="lg">Edit Pengguna</flux:heading>
@@ -292,7 +288,7 @@
                 placeholder="Konfirmasi kata sandi baru"
             />
 
-            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Peran">
+            <flux:checkbox.group wire:model="selectedRoles" label="Pilih Role">
                 @foreach($roles as $role)
                     <flux:checkbox
                         value="{{ $role->name }}"
@@ -316,7 +312,7 @@
     </flux:modal>
 
     <!-- Delete User Modal -->
-    <flux:modal name="delete-user" class="w-full max-w-lg mx-4">
+    <flux:modal name="delete-user" class="w-full max-w-lg mx-auto">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">Hapus Pengguna</flux:heading>

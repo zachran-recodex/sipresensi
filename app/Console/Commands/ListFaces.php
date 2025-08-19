@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\BiznetFaceService;
+use App\Services\FaceRecognitionService;
 use Illuminate\Console\Command;
 
 class ListFaces extends Command
@@ -31,7 +31,7 @@ class ListFaces extends Command
         $this->info("Listing faces in gallery: {$galleryId}");
 
         try {
-            $service = app(BiznetFaceService::class);
+            $service = app(FaceRecognitionService::class);
             $result = $service->listFaces($galleryId);
 
             if ($result['risetai']['status'] === '200') {

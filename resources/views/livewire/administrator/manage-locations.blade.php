@@ -7,22 +7,18 @@
 				<flux:subheading>Buat, edit, hapus lokasi dan kelola status mereka</flux:subheading>
 			</div>
 			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus" class="w-full md:w-auto">
-				Tambah Lokasi
+				Tambah
 			</flux:button>
 		</div>
 
-		<!-- Success/Error Messages -->
-		@if (session('message'))
-			<flux:callout variant="success" dismissible>
-				{{ session('message') }}
-			</flux:callout>
-		@endif
+        <!-- Success/Error Messages -->
+        @if (session('message'))
+            <flux:callout variant="success" dismissible heading="{{ session('message') }}" />
+        @endif
 
-		@if (session('error'))
-			<flux:callout variant="danger" dismissible>
-				{{ session('error') }}
-			</flux:callout>
-		@endif
+        @if (session('error'))
+            <flux:callout variant="danger" dismissible heading="{{ session('message') }}" />
+        @endif
 
 		<!-- Filters -->
 		<div class="bg-white p-4 rounded-lg border border-gray-200">
@@ -132,7 +128,7 @@
 	</div>
 
 	<!-- Create Location Modal -->
-	<flux:modal name="create-location" class="w-full max-w-6xl mx-4">
+	<flux:modal name="create-location" class="w-full max-w-4xl mx-auto">
 		<form wire:submit.prevent="createLocation" class="space-y-6">
 			<div>
 				<flux:heading size="lg">Buat Lokasi Baru</flux:heading>
@@ -213,8 +209,17 @@
 					<flux:heading size="md">Pilih Lokasi di Peta</flux:heading>
 					<div
 						class="h-[500px] rounded border border-zinc-200 overflow-hidden"
+						wire:ignore
 						x-data="leafletMap({ lat: {{ $latitude ? $latitude : '-6.2088' }}, lng: {{ $longitude ? $longitude : '106.8456' }}, bindTo: $wire })"
-						x-init="init()"
+						x-init="
+							$nextTick(() => {
+								setTimeout(() => {
+									if ($el && $el.offsetParent && $el.offsetWidth > 0) {
+										init();
+									}
+								}, 1000);
+							});
+						"
 					></div>
 					<p class="text-sm text-zinc-500">
 						Klik pada peta atau drag marker untuk menentukan lokasi yang tepat
@@ -237,7 +242,7 @@
 	</flux:modal>
 
 	<!-- Edit Location Modal -->
-	<flux:modal name="edit-location" class="w-full max-w-6xl mx-4">
+	<flux:modal name="edit-location" class="w-full max-w-4xl mx-auto">
 		<form wire:submit.prevent="updateLocation" class="space-y-6">
 			<div>
 				<flux:heading size="lg">Edit Lokasi</flux:heading>
@@ -318,8 +323,17 @@
 					<flux:heading size="md">Edit Lokasi di Peta</flux:heading>
 					<div
 						class="h-[500px] rounded border border-zinc-200 overflow-hidden"
+						wire:ignore
 						x-data="leafletMap({ lat: {{ $latitude ? $latitude : '-6.2088' }}, lng: {{ $longitude ? $longitude : '106.8456' }}, bindTo: $wire })"
-						x-init="init()"
+						x-init="
+							$nextTick(() => {
+								setTimeout(() => {
+									if ($el && $el.offsetParent && $el.offsetWidth > 0) {
+										init();
+									}
+								}, 1000);
+							});
+						"
 					></div>
 					<p class="text-sm text-zinc-500">
 						Klik pada peta atau drag marker untuk mengubah lokasi
@@ -341,8 +355,8 @@
 		</form>
 	</flux:modal>
 
-	<!-- Delete Location Modal -->
-	<flux:modal name="delete-location" class="w-full max-w-lg mx-4">
+    <!-- Delete Location Modal -->
+	<flux:modal name="delete-location" class="w-full max-w-lg mx-auto">
 		<div class="space-y-6">
 			<div>
 				<flux:heading size="lg">Hapus Lokasi</flux:heading>
@@ -442,47 +456,75 @@
 			window.getCurrentLocation = getCurrentLocation;
 
 			document.addEventListener('alpine:init', () => {
+				// Create unique map instances to prevent conflicts
 				window.leafletMap = ({ lat, lng, bindTo }) => ({
 					map: null,
 					marker: null,
 					circle: null,
+					destroyed: false,
 					init() {
-						// Wait for modal to be fully rendered
-						this.$nextTick(() => {
-							this.initMap();
+						// Check if already destroyed to prevent reuse
+						if (this.destroyed) return;
+
+						// Protect against Livewire updates
+						this.$el.addEventListener('livewire:update', (e) => {
+							e.stopPropagation();
 						});
 
-						// Listen for modal show/hide events
-						this.$el.addEventListener('flux:modal:shown', () => {
-							if (this.map) {
-								setTimeout(() => {
-									this.map.invalidateSize();
-									const center = [Number(this.$wire.latitude || lat), Number(this.$wire.longitude || lng)];
-									this.map.setView(center, this.map.getZoom());
-								}, 50);
+						// Listen for visibility changes
+						const observer = new MutationObserver(() => {
+							if (this.$el && this.$el.offsetParent && this.$el.offsetWidth > 0 && !this.map && !this.destroyed) {
+								setTimeout(() => this.initMap(), 100);
+								observer.disconnect();
 							}
 						});
 
-						this.$el.addEventListener('flux:modal:hidden', () => {
-							if (this.map) {
-								this.destroy();
-							}
+						observer.observe(document.body, {
+							childList: true,
+							subtree: true,
+							attributes: true,
+							attributeFilter: ['style', 'class']
 						});
+
+						// Direct initialization if already visible
+						if (this.$el && this.$el.offsetParent && this.$el.offsetWidth > 0 && !this.map) {
+							setTimeout(() => this.initMap(), 200);
+						}
 					},
 					initMap() {
 						const el = this.$el;
+						if (!el || !el.offsetParent || el.offsetWidth === 0 || el.offsetHeight === 0) {
+							return;
+						}
+
+						// Don't initialize if map already exists
+						if (this.map) {
+							return;
+						}
+
 						const center = [Number(lat || -6.2088), Number(lng || 106.8456)];
 
-						// Initialize map
-						this.map = L.map(el, {
-							zoomControl: true,
-							scrollWheelZoom: true,
-							doubleClickZoom: true,
-							boxZoom: true,
-							keyboard: true,
-							dragging: true,
-							attributionControl: true
-						}).setView(center, 15);
+						// Clear any existing leaflet instance completely
+						if (el._leaflet_id) {
+							delete el._leaflet_id;
+						}
+
+						try {
+							// Initialize map with safe options
+							this.map = L.map(el, {
+								preferCanvas: true,
+								zoomControl: true,
+								scrollWheelZoom: false, // Disable to prevent null errors
+								doubleClickZoom: true,
+								boxZoom: false,
+								keyboard: false, // Disable to prevent focus errors
+								dragging: true,
+								attributionControl: true
+							}).setView(center, 15);
+						} catch (error) {
+							console.error('Map init error:', error);
+							return;
+						}
 
 						// Add tile layer
 						L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -509,70 +551,156 @@
 							this.updateMarkerPosition(e.target.getLatLng());
 						});
 
-						// Force map resize after modal is shown
+						// Ensure proper rendering with multiple attempts
 						setTimeout(() => {
-							this.map.invalidateSize();
-							this.map.setView(center, 15);
-						}, 100);
+							if (this.map && this.$el.offsetParent) {
+								try {
+									this.map.invalidateSize();
+									this.map.setView(center, 15);
+									// Re-enable scroll wheel after initialization
+									this.map.scrollWheelZoom.enable();
+								} catch (e) {
+									// Silent fail
+								}
+							}
+						}, 500);
 
-						// Listen for coordinate changes
+						// Second attempt for stubborn cases
+						setTimeout(() => {
+							if (this.map && this.$el.offsetParent) {
+								try {
+									this.map.invalidateSize();
+								} catch (e) {}
+							}
+						}, 1000);
+
+						// Listen for coordinate changes with null checks
 						this.$watch('$wire.latitude', (value) => {
-							if (value && this.marker) {
-								const newLatLng = [Number(value), Number(this.$wire.longitude || lng)];
-								this.marker.setLatLng(newLatLng);
-								this.updateRadiusCircle();
-								this.map.setView(newLatLng, this.map.getZoom());
+							if (value && this.marker && this.map) {
+								try {
+									const newLatLng = [Number(value), Number(this.$wire.longitude || lng)];
+									this.marker.setLatLng(newLatLng);
+									this.updateRadiusCircle();
+									this.map.setView(newLatLng, this.map.getZoom());
+								} catch (e) {
+									// Silent fail
+								}
 							}
 						});
 
 						this.$watch('$wire.longitude', (value) => {
-							if (value && this.marker) {
-								const newLatLng = [Number(this.$wire.latitude || lat), Number(value)];
-								this.marker.setLatLng(newLatLng);
-								this.updateRadiusCircle();
-								this.map.setView(newLatLng, this.map.getZoom());
+							if (value && this.marker && this.map) {
+								try {
+									const newLatLng = [Number(this.$wire.latitude || lat), Number(value)];
+									this.marker.setLatLng(newLatLng);
+									this.updateRadiusCircle();
+									this.map.setView(newLatLng, this.map.getZoom());
+								} catch (e) {
+									// Silent fail
+								}
 							}
 						});
 
 						// Listen for radius changes
 						this.$watch('$wire.radius_meters', () => {
-							this.updateRadiusCircle();
+							if (this.map) {
+								try {
+									this.updateRadiusCircle();
+								} catch (e) {
+									// Silent fail
+								}
+							}
 						});
 					},
 					updateMarkerPosition(latLng) {
-						if (this.marker) {
-							this.marker.setLatLng(latLng);
-							// Update Livewire properties
-							bindTo.set('latitude', Number(latLng.lat.toFixed(6)));
-							bindTo.set('longitude', Number(latLng.lng.toFixed(6)));
-							// Update radius circle
-							this.updateRadiusCircle();
+						if (this.marker && this.map && latLng) {
+							try {
+								this.marker.setLatLng(latLng);
+								// Update Livewire properties
+								bindTo.set('latitude', Number(latLng.lat.toFixed(6)));
+								bindTo.set('longitude', Number(latLng.lng.toFixed(6)));
+								// Update radius circle
+								this.updateRadiusCircle();
+							} catch (e) {
+								// Silent fail
+							}
 						}
 					},
 					updateRadiusCircle() {
-						if (this.circle) {
-							this.map.removeLayer(this.circle);
+						if (!this.map) return;
+
+						try {
+							if (this.circle) {
+								this.map.removeLayer(this.circle);
+								this.circle = null;
+							}
+
+							const radius = Number(this.$wire.radius_meters || 100);
+							const center = this.marker ? this.marker.getLatLng() : [Number(this.$wire.latitude || -6.2088), Number(this.$wire.longitude || 106.8456)];
+
+							this.circle = L.circle(center, {
+								radius: radius,
+								color: '#3b82f6',
+								fillColor: '#3b82f6',
+								fillOpacity: 0.2,
+								weight: 2
+							}).addTo(this.map);
+						} catch (e) {
+							// Silent fail if map is being destroyed
 						}
-
-						const radius = Number(this.$wire.radius_meters || 100);
-						const center = this.marker ? this.marker.getLatLng() : [Number(this.$wire.latitude || -6.2088), Number(this.$wire.longitude || 106.8456)];
-
-						this.circle = L.circle(center, {
-							radius: radius,
-							color: '#3b82f6',
-							fillColor: '#3b82f6',
-							fillOpacity: 0.2,
-							weight: 2
-						}).addTo(this.map);
 					},
 					destroy() {
+						// Mark as destroyed to prevent reuse
+						this.destroyed = true;
+
 						if (this.map) {
-							this.map.remove();
-							this.map = null;
-							this.marker = null;
-							this.circle = null;
+							try {
+								// Remove layers first
+								if (this.marker) {
+									this.map.removeLayer(this.marker);
+									this.marker = null;
+								}
+								if (this.circle) {
+									this.map.removeLayer(this.circle);
+									this.circle = null;
+								}
+								// Remove all event listeners
+								this.map.off();
+								// Force cleanup
+								this.map._container = null;
+								this.map = null;
+							} catch (e) {
+								// Silent fail for cleanup errors
+								this.map = null;
+								this.marker = null;
+								this.circle = null;
+							}
+						}
+						// Clear element's leaflet reference
+						if (this.$el && this.$el._leaflet_id) {
+							delete this.$el._leaflet_id;
 						}
 					}
+				});
+			});
+
+			// Protect maps from Livewire updates
+			document.addEventListener('livewire:init', () => {
+				Livewire.hook('morph.updated', (el, component) => {
+					// Find all map containers and preserve them
+					el.querySelectorAll('[wire\\:ignore]').forEach(mapContainer => {
+						if (mapContainer.querySelector('.leaflet-container')) {
+							// Force map to refresh if it exists
+							setTimeout(() => {
+								try {
+									const leafletContainer = mapContainer.querySelector('.leaflet-container');
+									if (leafletContainer && leafletContainer._leaflet_map) {
+										leafletContainer._leaflet_map.invalidateSize();
+									}
+								} catch (e) {}
+							}, 100);
+						}
+					});
 				});
 			});
 		</script>

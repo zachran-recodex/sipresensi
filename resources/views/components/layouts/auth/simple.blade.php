@@ -13,17 +13,17 @@
 
                     <!-- Logo -->
                     <span class="flex h-16 w-16 items-center justify-center rounded-lg bg-primary">
-                                <x-app-logo-icon class="size-12 fill-current text-white" />
-                            </span>
+                        <x-app-logo-icon class="size-12 fill-current text-white" />
+                    </span>
 
                     <!-- App Name + Subtitle -->
                     <div class="flex flex-col justify-center text-center text-theme-primary">
-                                <span class="font-bold text-2xl leading-tight">
-                                    {{ config('app.name', 'Sipresensi') }}
-                                </span>
+                        <span class="font-bold text-2xl leading-tight">
+                            {{ config('app.name', 'Sipresensi') }}
+                        </span>
                         <span class="text-base leading-tight">
-                                    Sistem Presensi
-                                </span>
+                            Sistem Presensi
+                        </span>
                     </div>
                 </a>
 

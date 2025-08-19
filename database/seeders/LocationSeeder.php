@@ -21,35 +21,5 @@ class LocationSeeder extends Seeder
             'radius_meters' => 150,
             'is_active' => true,
         ]);
-
-        Location::factory()->create([
-            'name' => 'Cabang Bandung',
-            'address' => 'Jl. Asia Afrika No. 45, Bandung',
-            'latitude' => -6.9175,
-            'longitude' => 107.6191,
-            'radius_meters' => 100,
-            'is_active' => true,
-        ]);
-
-        Location::factory()->create([
-            'name' => 'Cabang Surabaya',
-            'address' => 'Jl. Tunjungan No. 67, Surabaya',
-            'latitude' => -7.2575,
-            'longitude' => 112.7521,
-            'radius_meters' => 200,
-            'is_active' => true,
-        ]);
-
-        Location::factory()->create([
-            'name' => 'Cabang Medan',
-            'address' => 'Jl. Sudirman No. 89, Medan',
-            'latitude' => 3.5952,
-            'longitude' => 98.6722,
-            'radius_meters' => 120,
-            'is_active' => false,
-        ]);
-
-        // Create additional random locations
-        Location::factory(10)->create();
     }
 }
