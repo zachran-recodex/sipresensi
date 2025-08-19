@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <flux:heading size="xl">Kelola Pengguna</flux:heading>
-                <p class="text-zinc-500">Buat, edit, hapus pengguna dan kelola peran mereka</p>
+                <flux:subheading>Buat, edit, hapus pengguna dan kelola peran mereka</flux:subheading>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-user').show()" variant="primary" icon="plus">
                 Tambah
@@ -14,15 +14,15 @@
         <!-- View Mode Toggle -->
         @if(auth()->user()->hasRole('super admin'))
             <div class="flex space-x-1 p-1 bg-zinc-100 rounded-lg w-fit">
-                <flux:button 
-                    wire:click="setViewMode('users')" 
+                <flux:button
+                    wire:click="setViewMode('users')"
                     variant="{{ $viewMode === 'users' ? 'primary' : 'ghost' }}"
                     size="sm"
                 >
                     Pengguna Biasa
                 </flux:button>
-                <flux:button 
-                    wire:click="setViewMode('super-admin')" 
+                <flux:button
+                    wire:click="setViewMode('super-admin')"
                     variant="{{ $viewMode === 'super-admin' ? 'primary' : 'ghost' }}"
                     size="sm"
                 >

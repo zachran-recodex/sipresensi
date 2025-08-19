@@ -1,5 +1,5 @@
 <div class="space-y-6">
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
             <flux:heading size="xl">Laporan Absensi</flux:heading>
@@ -78,12 +78,12 @@
         <div class="mb-4">
             <flux:text class="text-sm font-medium text-gray-700 mb-2">Quick Date Range:</flux:text>
             <div class="flex flex-wrap gap-2">
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('today')">Hari Ini</flux:button>
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('yesterday')">Kemarin</flux:button>
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('this_week')">Minggu Ini</flux:button>
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('last_week')">Minggu Lalu</flux:button>
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('this_month')">Bulan Ini</flux:button>
-                <flux:button variant="ghost" size="sm" wire:click="setDateRange('last_month')">Bulan Lalu</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('today')">Hari Ini</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('yesterday')">Kemarin</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('this_week')">Minggu Ini</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('last_week')">Minggu Lalu</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('this_month')">Bulan Ini</flux:button>
+                <flux:button variant="primary" size="sm" wire:click="setDateRange('last_month')">Bulan Lalu</flux:button>
             </div>
         </div>
 

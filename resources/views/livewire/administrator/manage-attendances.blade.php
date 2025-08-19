@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <flux:heading size="xl">Kelola Pengaturan Kehadiran</flux:heading>
-                <p class="text-zinc-500">Atur lokasi, jam kerja, dan hari kerja untuk karyawan</p>
+                <flux:subheading>Atur lokasi, jam kerja, dan hari kerja untuk karyawan</flux:subheading>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-attendance').show()" variant="primary" icon="plus">
                 Tambah
@@ -189,7 +189,7 @@
                 <div class="grid grid-cols-7 gap-2">
                     @php
                         $days = [
-                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam', 
+                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam',
                             5 => 'Jum', 6 => 'Sab', 7 => 'Min'
                         ];
                     @endphp
@@ -272,7 +272,7 @@
                 <div class="grid grid-cols-7 gap-2">
                     @php
                         $days = [
-                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam', 
+                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam',
                             5 => 'Jum', 6 => 'Sab', 7 => 'Min'
                         ];
                     @endphp

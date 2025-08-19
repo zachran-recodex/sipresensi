@@ -168,10 +168,10 @@ test('admin cannot delete themselves', function () {
 test('admin can manage user roles', function () {
     Livewire::actingAs($this->adminUser)
         ->test(ManageUsers::class)
-        ->call('setSelectedUser', $this->karyawanUser->id)
+        ->call('setEditUser', $this->karyawanUser->id)
         ->assertSet('selectedRoles', ['karyawan'])
         ->set('selectedRoles', ['admin', 'karyawan'])
-        ->call('updateUserRoles');
+        ->call('updateUser');
 
     $this->karyawanUser->refresh();
     expect($this->karyawanUser->hasRole(['admin', 'karyawan']))->toBeTrue();

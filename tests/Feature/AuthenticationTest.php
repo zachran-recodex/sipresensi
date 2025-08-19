@@ -65,7 +65,7 @@ test('login form uses username field', function () {
 
     $response->assertStatus(200);
     $response->assertSee('Username');
-    $response->assertSee('Enter your username and password below to log in');
+    $response->assertSee('Masukkan username dan password Anda di bawah ini untuk masuk');
 });
 
 test('register form includes username field', function () {
@@ -73,7 +73,7 @@ test('register form includes username field', function () {
 
     $response->assertStatus(200);
     $response->assertSee('Username');
-    $response->assertSee('Create an account');
+    $response->assertSee('Buat akun');
 });
 
 test('livewire login component works with username', function () {

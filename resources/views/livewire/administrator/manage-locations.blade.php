@@ -4,7 +4,7 @@
 		<div class="flex justify-between items-center">
 			<div>
 				<flux:heading size="xl">Kelola Lokasi</flux:heading>
-				<p class="text-zinc-500">Buat, edit, hapus lokasi dan kelola status mereka</p>
+				<flux:subheading>Buat, edit, hapus lokasi dan kelola status mereka</flux:subheading>
 			</div>
 			<flux:button x-on:click="$wire.resetForm(); $flux.modal('create-location').show()" variant="primary" icon="plus">
 				Tambah
@@ -153,10 +153,10 @@
 					<div class="space-y-4">
 						<div class="flex items-center justify-between">
 							<label class="text-sm font-medium text-zinc-700">Koordinat Lokasi</label>
-							<flux:button 
-								x-on:click="getCurrentLocation()" 
-								size="sm" 
-								variant="outline" 
+							<flux:button
+								x-on:click="getCurrentLocation()"
+								size="sm"
+								variant="outline"
 								icon="map-pin"
 								title="Gunakan lokasi saat ini"
 							>
@@ -258,10 +258,10 @@
 					<div class="space-y-4">
 						<div class="flex items-center justify-between">
 							<label class="text-sm font-medium text-zinc-700">Koordinat Lokasi</label>
-							<flux:button 
-								x-on:click="getCurrentLocation()" 
-								size="sm" 
-								variant="outline" 
+							<flux:button
+								x-on:click="getCurrentLocation()"
+								size="sm"
+								variant="outline"
 								icon="map-pin"
 								title="Gunakan lokasi saat ini"
 							>
@@ -393,10 +393,10 @@
 					function(position) {
 						const latitude = position.coords.latitude;
 						const longitude = position.coords.longitude;
-						
+
 						// Update Livewire properties
 						Livewire.find(button.closest('[wire\\:id]').getAttribute('wire:id'))?.call('setCurrentLocation', latitude, longitude);
-						
+
 						// Restore button
 						button.innerHTML = originalText;
 						button.disabled = false;
@@ -418,7 +418,7 @@
 								break;
 						}
 						alert(message);
-						
+
 						// Restore button
 						button.innerHTML = originalText;
 						button.disabled = false;
