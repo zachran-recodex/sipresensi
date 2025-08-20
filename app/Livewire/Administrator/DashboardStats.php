@@ -16,7 +16,7 @@ class DashboardStats extends Component
 
         $stats = [
             'total_karyawan' => User::role('karyawan')->count(),
-            'total_admin' => User::role(['admin', 'super admin'])->count(),
+            'total_admin' => User::role('admin')->count(),
             'hadir_hari_ini' => AttendanceRecord::whereDate('created_at', $today)
                 ->where('type', 'check_in')
                 ->distinct('user_id')

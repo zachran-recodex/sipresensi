@@ -131,6 +131,14 @@ class AttendanceReports extends Component
     {
         return AttendanceRecord::query()
             ->with(['user'])
+            // Admin users cannot see super admin attendance records
+            ->when(auth()->user()->hasRole('admin') && !auth()->user()->hasRole('super admin'), function (Builder $query) {
+                $query->whereHas('user', function (Builder $userQuery) {
+                    $userQuery->whereDoesntHave('roles', function ($roleQuery) {
+                        $roleQuery->where('name', 'super admin');
+                    });
+                });
+            })
             ->when($this->search, function (Builder $query) {
                 $query->whereHas('user', function (Builder $userQuery) {
                     $userQuery->where('name', 'like', '%'.$this->search.'%')
@@ -159,6 +167,18 @@ class AttendanceReports extends Component
 
     public function getUsersProperty()
     {
+        // Admin can only see admin and karyawan users, not super admin
+        if (auth()->user()->hasRole('admin') && !auth()->user()->hasRole('super admin')) {
+            return User::query()
+                ->select(['id', 'name', 'username'])
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'super admin');
+                })
+                ->orderBy('name')
+                ->get();
+        }
+        
+        // Super admin can see all users
         return User::query()
             ->select(['id', 'name', 'username'])
             ->orderBy('name')
@@ -168,6 +188,14 @@ class AttendanceReports extends Component
     public function getStatsProperty()
     {
         $baseQuery = AttendanceRecord::query()
+            // Admin users cannot see super admin attendance stats
+            ->when(auth()->user()->hasRole('admin') && !auth()->user()->hasRole('super admin'), function (Builder $query) {
+                $query->whereHas('user', function (Builder $userQuery) {
+                    $userQuery->whereDoesntHave('roles', function ($roleQuery) {
+                        $roleQuery->where('name', 'super admin');
+                    });
+                });
+            })
             ->when($this->startDate, function (Builder $query) {
                 $query->whereDate('recorded_at', '>=', $this->startDate);
             })
