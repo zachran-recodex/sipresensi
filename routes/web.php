@@ -33,6 +33,7 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     // Administrator routes
     Route::middleware(['role:super admin|admin'])->group(function () {
         Route::get('administrator/manage-users', \App\Livewire\Administrator\ManageUsers::class)->name('administrator.manage-users');
+        Route::get('administrator/users/{user}', \App\Livewire\Administrator\ShowUser::class)->name('administrator.show-user');
         Route::get('administrator/manage-locations', \App\Livewire\Administrator\ManageLocations::class)->name('administrator.manage-locations');
         Route::get('administrator/manage-attendances', \App\Livewire\Administrator\ManageAttendances::class)->name('administrator.manage-attendances');
         Route::get('administrator/attendance-reports', \App\Livewire\Administrator\AttendanceReports::class)->name('administrator.attendance-reports');

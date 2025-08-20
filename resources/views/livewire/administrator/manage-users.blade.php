@@ -75,6 +75,9 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Role
                         </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                            Status Wajah
+                        </th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                             Aksi
                         </th>
@@ -113,8 +116,35 @@
                                     @endforeach
                                 </div>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($user->hasRole('karyawan'))
+                                    @if($user->faceEnrollment)
+                                        <div class="flex items-center gap-2">
+                                            <flux:badge size="sm" color="green">
+                                                <flux:icon.check-circle class="size-3" />
+                                                Terdaftar
+                                            </flux:badge>
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-2">
+                                            <flux:badge size="sm" color="red">
+                                                <flux:icon.x-circle class="size-3" />
+                                                Belum Terdaftar
+                                            </flux:badge>
+                                        </div>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-zinc-400">-</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex flex-col md:flex-row items-end md:items-center gap-2 justify-end">
+                                    <!-- Show button - available for all users -->
+                                    <flux:button href="{{ route('administrator.show-user', $user) }}" size="sm" variant="subtle" icon="eye" class="w-full md:w-auto">
+                                        <span class="md:hidden">Lihat {{ $user->name }}</span>
+                                        <span class="hidden md:inline">Lihat</span>
+                                    </flux:button>
+
                                     @if($viewMode === 'super-admin')
                                         <!-- Super Admin users - only super admin can manage them -->
                                         @if(auth()->user()->hasRole('super admin'))
@@ -127,7 +157,7 @@
                                                 <span class="hidden md:inline">Hapus</span>
                                             </flux:button>
                                         @else
-                                            <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                            <span class="text-xs text-zinc-400">Tidak ada akses untuk edit/hapus</span>
                                         @endif
                                     @else
                                         <!-- Regular users -->
@@ -141,7 +171,7 @@
                                                 <span class="hidden md:inline">Hapus</span>
                                             </flux:button>
                                         @else
-                                            <span class="text-xs text-zinc-400">Tidak ada akses</span>
+                                            <span class="text-xs text-zinc-400">Tidak ada akses untuk edit/hapus</span>
                                         @endif
                                     @endif
                                 </div>
@@ -149,7 +179,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center">
+                            <td colspan="5" class="px-6 py-12 text-center">
                                 <div class="text-zinc-500">
                                     <flux:icon.users class="mx-auto size-12 mb-4 text-zinc-300" />
                                     <h3 class="text-sm font-medium">
@@ -348,4 +378,5 @@
             </div>
         </div>
     </flux:modal>
+
 </div>

@@ -1,3 +1,120 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Application Overview
+
+**Sipresensi** is a Laravel-based attendance management system with face recognition capabilities. The system supports multiple user roles (super admin, admin, karyawan) and provides location-based attendance tracking with geographic validation.
+
+### Key Features
+- Face recognition enrollment and attendance checking
+- Location-based attendance with GPS radius validation
+- Role-based access control (super admin, admin, karyawan)
+- Comprehensive attendance reporting and management
+- Real-time attendance tracking with check-in/check-out functionality
+
+### Development Commands
+
+**Build & Development:**
+- `composer run dev` - Start all services (PHP server, queue worker, Vite)
+- `npm run dev` - Start Vite development server
+- `npm run build` - Build frontend assets
+- `php artisan serve` - Start Laravel development server
+
+**Testing:**
+- `php artisan test` - Run all tests
+- `php artisan test tests/Feature/ExampleTest.php` - Run specific test file
+- `php artisan test --filter=testName` - Run specific test
+
+**Code Quality:**
+- `vendor/bin/pint --dirty` - Format code (run before committing)
+
+**Database:**
+- `php artisan migrate` - Run migrations
+- `php artisan db:seed` - Seed database
+- `php artisan migrate:fresh --seed` - Fresh migration with seeding
+
+## Application Architecture
+
+### Models & Database Schema
+
+**Core Models:**
+- `User` - Authentication with username-based login, roles via Spatie/Permission
+- `Attendance` - User attendance settings (schedule, location, work days)
+- `AttendanceRecord` - Individual check-in/check-out records
+- `Location` - Geographic locations with radius validation
+- `FaceEnrollment` - Face recognition data storage
+
+**Key Relationships:**
+- User hasOne Attendance (settings)
+- User hasMany AttendanceRecords (daily records)
+- User hasOne FaceEnrollment
+- Attendance belongsTo Location
+- AttendanceRecord belongsTo User, Location
+
+### Authentication & Authorization
+
+**Roles:** super admin, admin, karyawan
+- Super admin: Full system access
+- Admin: User management, attendance management (cannot manage super admins)
+- Karyawan: Face enrollment, attendance check-in/out
+
+**Login:** Username-based authentication (not email)
+
+### Face Recognition Integration
+
+**Biznet Face API Integration:**
+- Environment variables: `BIZNET_FACE_API_TOKEN`, `BIZNET_FACE_API_URL`, `BIZNET_FACE_GALLERY_ID`
+- Face enrollment component: `FaceEnrollmentComponent`
+- Face attendance component: `FaceAttendanceComponent`
+
+### Frontend Architecture
+
+**Component Structure:**
+- Mix of Livewire Class-based components (`app/Livewire/`) and Volt components (`resources/views/livewire/`)
+- Flux UI components for consistent UI
+- Responsive design with mobile-first approach
+- Dark mode support throughout
+
+**Key Livewire Components:**
+- `Administrator\ManageUsers` - User CRUD with role management
+- `Administrator\ManageLocations` - Location management
+- `Administrator\ManageAttendances` - Attendance settings management
+- `Administrator\AttendanceReports` - Reporting dashboard
+
+### Location & Geographic Features
+
+**Location Validation:**
+- GPS coordinate storage (latitude/longitude)
+- Configurable radius validation (meters)
+- Leaflet.js integration for map display
+- Real-time location verification during check-in/out
+
+### Testing Strategy
+
+**Test Structure:**
+- Feature tests in `tests/Feature/` (primary)
+- Unit tests in `tests/Unit/` (minimal)
+- Pest testing framework
+- Authentication tests, role tests, component tests
+
+**Default Test Users:**
+- Super Admin: zachranraze@recodex.id / zachranraze
+- Admin: admin@example.com / admin  
+- Karyawan: karyawan@example.com / karyawan
+
+### Configuration Notes
+
+**Environment:**
+- SQLite database by default
+- Indonesian locale (`APP_LOCALE=id`)
+- Queue driver: database
+- Session driver: database
+
+**Admin Contact System:**
+- Configurable admin contact info for password reset/face re-enrollment
+- Environment variables: `ADMIN_CONTACT_*`
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

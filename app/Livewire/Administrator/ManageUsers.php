@@ -53,7 +53,7 @@ class ManageUsers extends Component
     {
         if ($this->viewMode === 'super-admin') {
             // Show only super admin users
-            $users = User::with('roles')
+            $users = User::with(['roles', 'faceEnrollment'])
                 ->whereHas('roles', function ($query) {
                     $query->where('name', 'super admin');
                 })
@@ -66,7 +66,7 @@ class ManageUsers extends Component
                 ->paginate(10);
         } else {
             // Show regular users (excluding super admin)
-            $users = User::with('roles')
+            $users = User::with(['roles', 'faceEnrollment'])
                 ->whereDoesntHave('roles', function ($query) {
                     $query->where('name', 'super admin');
                 })
