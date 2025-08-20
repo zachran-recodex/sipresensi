@@ -181,30 +181,49 @@
                     @endphp
                     @foreach($days as $dayNum => $dayName)
                         <div class="border border-zinc-200 rounded-lg p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <flux:switch
-                                    wire:click="toggleWorkDay({{ $dayNum }})"
-                                    :checked="isset($dailySchedules[{{ $dayNum }}])"
-                                />
-                                <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                            <div class="flex items-center justify-between mb-3">
+                                <label for="day-{{ $dayNum }}" class="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        id="day-{{ $dayNum }}"
+                                        wire:click="toggleWorkDay({{ $dayNum }})"
+                                        wire:loading.attr="disabled"
+                                        {{ isset($dailySchedules[$dayNum]) ? 'checked' : '' }}
+                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                                </label>
+                                @if(isset($dailySchedules[$dayNum]))
+                                    <span class="text-xs text-zinc-500 bg-zinc-100 px-2 py-1 rounded">
+                                        {{ $dailySchedules[$dayNum]['clock_in'] ?? '00:00' }} - {{ $dailySchedules[$dayNum]['clock_out'] ?? '00:00' }}
+                                    </span>
+                                @endif
                             </div>
                             
                             @if(isset($dailySchedules[$dayNum]))
-                                <div class="grid grid-cols-2 gap-3 ml-8">
-                                    <flux:input
-                                        wire:model="dailySchedules.{{ $dayNum }}.clock_in"
-                                        label="Jam Masuk"
-                                        type="time"
-                                        size="sm"
-                                        required
-                                    />
-                                    <flux:input
-                                        wire:model="dailySchedules.{{ $dayNum }}.clock_out"
-                                        label="Jam Keluar"
-                                        type="time"
-                                        size="sm"
-                                        required
-                                    />
+                                <div class="mt-3 bg-zinc-50 rounded-lg p-3">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Masuk</label>
+                                            <flux:input
+                                                wire:model.live="dailySchedules.{{ $dayNum }}.clock_in"
+                                                type="time"
+                                                size="sm"
+                                                wire:loading.attr="disabled"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Keluar</label>
+                                            <flux:input
+                                                wire:model.live="dailySchedules.{{ $dayNum }}.clock_out"
+                                                type="time"
+                                                size="sm"
+                                                wire:loading.attr="disabled"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -212,7 +231,15 @@
                 </div>
             </div>
 
-            <flux:switch wire:model="isActive" label="Aktif" />
+            <div class="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    id="isActive"
+                    wire:model="isActive"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label for="isActive" class="text-sm font-medium text-zinc-900">Status Aktif</label>
+            </div>
 
             <div class="flex gap-3">
                 <flux:spacer />
@@ -268,30 +295,49 @@
                     @endphp
                     @foreach($days as $dayNum => $dayName)
                         <div class="border border-zinc-200 rounded-lg p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <flux:switch
-                                    wire:click="toggleWorkDay({{ $dayNum }})"
-                                    :checked="isset($dailySchedules[{{ $dayNum }}])"
-                                />
-                                <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                            <div class="flex items-center justify-between mb-3">
+                                <label for="day-{{ $dayNum }}" class="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        id="day-{{ $dayNum }}"
+                                        wire:click="toggleWorkDay({{ $dayNum }})"
+                                        wire:loading.attr="disabled"
+                                        {{ isset($dailySchedules[$dayNum]) ? 'checked' : '' }}
+                                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                                </label>
+                                @if(isset($dailySchedules[$dayNum]))
+                                    <span class="text-xs text-zinc-500 bg-zinc-100 px-2 py-1 rounded">
+                                        {{ $dailySchedules[$dayNum]['clock_in'] ?? '00:00' }} - {{ $dailySchedules[$dayNum]['clock_out'] ?? '00:00' }}
+                                    </span>
+                                @endif
                             </div>
                             
                             @if(isset($dailySchedules[$dayNum]))
-                                <div class="grid grid-cols-2 gap-3 ml-8">
-                                    <flux:input
-                                        wire:model="dailySchedules.{{ $dayNum }}.clock_in"
-                                        label="Jam Masuk"
-                                        type="time"
-                                        size="sm"
-                                        required
-                                    />
-                                    <flux:input
-                                        wire:model="dailySchedules.{{ $dayNum }}.clock_out"
-                                        label="Jam Keluar"
-                                        type="time"
-                                        size="sm"
-                                        required
-                                    />
+                                <div class="mt-3 bg-zinc-50 rounded-lg p-3">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Masuk</label>
+                                            <flux:input
+                                                wire:model.live="dailySchedules.{{ $dayNum }}.clock_in"
+                                                type="time"
+                                                size="sm"
+                                                wire:loading.attr="disabled"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Keluar</label>
+                                            <flux:input
+                                                wire:model.live="dailySchedules.{{ $dayNum }}.clock_out"
+                                                type="time"
+                                                size="sm"
+                                                wire:loading.attr="disabled"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -299,7 +345,15 @@
                 </div>
             </div>
 
-            <flux:switch wire:model="isActive" label="Aktif" />
+            <div class="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    id="isActive"
+                    wire:model="isActive"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label for="isActive" class="text-sm font-medium text-zinc-900">Status Aktif</label>
+            </div>
 
             <div class="flex gap-3">
                 <flux:spacer />

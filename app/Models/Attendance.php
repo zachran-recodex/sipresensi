@@ -117,13 +117,69 @@ class Attendance extends Model
             5 => 'Jum', 6 => 'Sab', 7 => 'Min',
         ];
 
-        $schedules = [];
+        // Group days by same schedule time
+        $groupedSchedules = [];
         foreach ($this->daily_schedules as $day => $schedule) {
-            $dayName = $dayNames[(int) $day] ?? $day;
-            $schedules[] = "{$dayName}: {$schedule['clock_in']}-{$schedule['clock_out']}";
+            $timeKey = $schedule['clock_in'] . '-' . $schedule['clock_out'];
+            $groupedSchedules[$timeKey][] = (int) $day;
         }
 
-        return implode(', ', $schedules);
+        $schedules = [];
+        foreach ($groupedSchedules as $timeKey => $days) {
+            [$clockIn, $clockOut] = explode('-', $timeKey);
+            
+            // Sort days for consistent display
+            sort($days);
+            
+            if (count($days) == 1) {
+                $dayName = $dayNames[$days[0]];
+                $schedules[] = "{$dayName}: {$clockIn}-{$clockOut}";
+            } else {
+                // Group consecutive days
+                $dayGroups = $this->groupConsecutiveDays($days, $dayNames);
+                $schedules[] = implode(', ', $dayGroups) . ": {$clockIn}-{$clockOut}";
+            }
+        }
+
+        return implode(' | ', $schedules);
+    }
+
+    /**
+     * Group consecutive days for compact display.
+     */
+    private function groupConsecutiveDays(array $days, array $dayNames): array
+    {
+        $groups = [];
+        $current = [$days[0]];
+        
+        for ($i = 1; $i < count($days); $i++) {
+            if ($days[$i] == $days[$i-1] + 1) {
+                $current[] = $days[$i];
+            } else {
+                $groups[] = $this->formatDayGroup($current, $dayNames);
+                $current = [$days[$i]];
+            }
+        }
+        
+        $groups[] = $this->formatDayGroup($current, $dayNames);
+        
+        return $groups;
+    }
+
+    /**
+     * Format a group of days (e.g., "Sen-Jum" or "Sen, Rab").
+     */
+    private function formatDayGroup(array $days, array $dayNames): string
+    {
+        if (count($days) == 1) {
+            return $dayNames[$days[0]];
+        } elseif (count($days) >= 3 && $days == range($days[0], end($days))) {
+            // Consecutive days: Sen-Jum
+            return $dayNames[$days[0]] . '-' . $dayNames[end($days)];
+        } else {
+            // Non-consecutive: Sen, Rab, Sab
+            return implode(', ', array_map(fn($day) => $dayNames[$day], $days));
+        }
     }
 
     /**
