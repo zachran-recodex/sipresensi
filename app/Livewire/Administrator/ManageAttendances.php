@@ -21,11 +21,7 @@ class ManageAttendances extends Component
 
     public $locationId = '';
 
-    public $clockInTime = '09:00';
-
-    public $clockOutTime = '17:00';
-
-    public $workDays = [1, 2, 3, 4, 5]; // Default: Monday to Friday
+    public $dailySchedules = [];
 
     public $isActive = true;
 
@@ -39,9 +35,9 @@ class ManageAttendances extends Component
     protected $rules = [
         'userId' => 'required|exists:users,id',
         'locationId' => 'required|exists:locations,id',
-        'clockInTime' => 'required|date_format:H:i',
-        'clockOutTime' => 'required|date_format:H:i|after:clockInTime',
-        'workDays' => 'required|array|min:1',
+        'dailySchedules' => 'required|array|min:1',
+        'dailySchedules.*.clock_in' => 'required|date_format:H:i',
+        'dailySchedules.*.clock_out' => 'required|date_format:H:i|after:dailySchedules.*.clock_in',
         'isActive' => 'boolean',
     ];
 
@@ -50,19 +46,145 @@ class ManageAttendances extends Component
         'userId.exists' => 'Pengguna yang dipilih tidak valid.',
         'locationId.required' => 'Pilih lokasi terlebih dahulu.',
         'locationId.exists' => 'Lokasi yang dipilih tidak valid.',
-        'clockInTime.required' => 'Jam masuk kerja harus diisi.',
-        'clockInTime.date_format' => 'Format jam masuk kerja tidak valid.',
-        'clockOutTime.required' => 'Jam keluar kerja harus diisi.',
-        'clockOutTime.date_format' => 'Format jam keluar kerja tidak valid.',
-        'clockOutTime.after' => 'Jam keluar kerja harus setelah jam masuk kerja.',
-        'workDays.required' => 'Pilih minimal satu hari kerja.',
-        'workDays.min' => 'Pilih minimal satu hari kerja.',
+        'dailySchedules.required' => 'Atur jadwal minimal untuk satu hari.',
+        'dailySchedules.min' => 'Atur jadwal minimal untuk satu hari.',
+        'dailySchedules.*.clock_in.required' => 'Jam masuk kerja harus diisi.',
+        'dailySchedules.*.clock_in.date_format' => 'Format jam masuk kerja tidak valid.',
+        'dailySchedules.*.clock_out.required' => 'Jam keluar kerja harus diisi.',
+        'dailySchedules.*.clock_out.date_format' => 'Format jam keluar kerja tidak valid.',
+        'dailySchedules.*.clock_out.after' => 'Jam keluar kerja harus setelah jam masuk kerja.',
     ];
 
     protected $listeners = [
         'attendanceUpdated' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
+
+    public function setEditAttendance(int $attendanceId): void
+    {
+        $attendance = Attendance::with('user')->findOrFail($attendanceId);
+
+        $this->resetForm();
+        $this->selectedAttendanceId = $attendance->id;
+        $this->selectedAttendance = $attendance;
+        $this->userId = $attendance->user_id;
+        $this->locationId = $attendance->location_id;
+        $this->dailySchedules = $attendance->daily_schedules ?? [];
+        $this->isActive = $attendance->is_active;
+
+        // Update validation rules for edit
+        $this->rules['userId'] = 'required|exists:users,id';
+    }
+
+    public function setDeleteAttendance(int $attendanceId): void
+    {
+        $attendance = Attendance::with('user')->findOrFail($attendanceId);
+        $this->selectedAttendanceId = $attendance->id;
+        $this->selectedAttendance = $attendance;
+    }
+
+    public function createAttendance(): void
+    {
+        $this->validate();
+
+        Attendance::create([
+            'user_id' => $this->userId,
+            'location_id' => $this->locationId,
+            'daily_schedules' => $this->dailySchedules,
+            'is_active' => $this->isActive,
+        ]);
+
+        $this->resetForm();
+        $this->dispatch('attendanceCreated');
+        $this->modal('create-attendance')->close();
+        session()->flash('message', 'Pengaturan kehadiran berhasil dibuat.');
+    }
+
+    public function updateAttendance(): void
+    {
+        $this->validate();
+
+        $attendance = Attendance::findOrFail($this->selectedAttendanceId);
+
+        $attendance->update([
+            'user_id' => $this->userId,
+            'location_id' => $this->locationId,
+            'daily_schedules' => $this->dailySchedules,
+            'is_active' => $this->isActive,
+        ]);
+
+        $this->resetForm();
+        $this->dispatch('attendanceUpdated');
+        $this->modal('edit-attendance')->close();
+        session()->flash('message', 'Pengaturan kehadiran berhasil diperbarui.');
+    }
+
+    public function deleteAttendance(): void
+    {
+        $attendance = Attendance::findOrFail($this->selectedAttendanceId);
+        $attendance->delete();
+
+        $this->resetForm();
+        $this->dispatch('attendanceDeleted');
+        $this->modal('delete-attendance')->close();
+        session()->flash('message', 'Pengaturan kehadiran berhasil dihapus.');
+    }
+
+    public function resetForm(): void
+    {
+        $this->selectedAttendanceId = null;
+        $this->selectedAttendance = null;
+        $this->userId = '';
+        $this->locationId = '';
+        $this->dailySchedules = [];
+        $this->isActive = true;
+
+        $this->resetErrorBag();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedLocationFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function onModalClose(): void
+    {
+        $this->resetForm();
+    }
+
+    public function toggleWorkDay(int $day): void
+    {
+        if (isset($this->dailySchedules[$day])) {
+            unset($this->dailySchedules[$day]);
+        } else {
+            $this->dailySchedules[$day] = [
+                'clock_in' => '09:00',
+                'clock_out' => '17:00',
+            ];
+        }
+    }
+
+    public function updateDaySchedule(int $day, string $field, string $value): void
+    {
+        if (! isset($this->dailySchedules[$day])) {
+            $this->dailySchedules[$day] = [
+                'clock_in' => '09:00',
+                'clock_out' => '17:00',
+            ];
+        }
+
+        $this->dailySchedules[$day][$field] = $value;
+    }
 
     public function render()
     {
@@ -96,125 +218,5 @@ class ManageAttendances extends Component
         $locations = Location::active()->orderBy('name')->get();
 
         return view('livewire.administrator.manage-attendances', compact('attendances', 'users', 'locations'));
-    }
-
-    public function setEditAttendance(int $attendanceId): void
-    {
-        $attendance = Attendance::with('user')->findOrFail($attendanceId);
-
-        $this->resetForm();
-        $this->selectedAttendanceId = $attendance->id;
-        $this->selectedAttendance = $attendance;
-        $this->userId = $attendance->user_id;
-        $this->locationId = $attendance->location_id;
-        $this->clockInTime = $attendance->getFormattedClockInTime();
-        $this->clockOutTime = $attendance->getFormattedClockOutTime();
-        $this->workDays = $attendance->work_days;
-        $this->isActive = $attendance->is_active;
-
-        // Update validation rules for edit
-        $this->rules['userId'] = 'required|exists:users,id';
-    }
-
-    public function setDeleteAttendance(int $attendanceId): void
-    {
-        $attendance = Attendance::with('user')->findOrFail($attendanceId);
-        $this->selectedAttendanceId = $attendance->id;
-        $this->selectedAttendance = $attendance;
-    }
-
-    public function createAttendance(): void
-    {
-        $this->validate();
-
-        Attendance::create([
-            'user_id' => $this->userId,
-            'location_id' => $this->locationId,
-            'clock_in_time' => $this->clockInTime,
-            'clock_out_time' => $this->clockOutTime,
-            'work_days' => $this->workDays,
-            'is_active' => $this->isActive,
-        ]);
-
-        $this->resetForm();
-        $this->dispatch('attendanceCreated');
-        $this->modal('create-attendance')->close();
-        session()->flash('message', 'Pengaturan kehadiran berhasil dibuat.');
-    }
-
-    public function updateAttendance(): void
-    {
-        $this->validate();
-
-        $attendance = Attendance::findOrFail($this->selectedAttendanceId);
-
-        $attendance->update([
-            'user_id' => $this->userId,
-            'location_id' => $this->locationId,
-            'clock_in_time' => $this->clockInTime,
-            'clock_out_time' => $this->clockOutTime,
-            'work_days' => $this->workDays,
-            'is_active' => $this->isActive,
-        ]);
-
-        $this->resetForm();
-        $this->dispatch('attendanceUpdated');
-        $this->modal('edit-attendance')->close();
-        session()->flash('message', 'Pengaturan kehadiran berhasil diperbarui.');
-    }
-
-    public function deleteAttendance(): void
-    {
-        $attendance = Attendance::findOrFail($this->selectedAttendanceId);
-        $attendance->delete();
-
-        $this->resetForm();
-        $this->dispatch('attendanceDeleted');
-        $this->modal('delete-attendance')->close();
-        session()->flash('message', 'Pengaturan kehadiran berhasil dihapus.');
-    }
-
-    public function resetForm(): void
-    {
-        $this->selectedAttendanceId = null;
-        $this->selectedAttendance = null;
-        $this->userId = '';
-        $this->locationId = '';
-        $this->clockInTime = '09:00';
-        $this->clockOutTime = '17:00';
-        $this->workDays = [1, 2, 3, 4, 5];
-        $this->isActive = true;
-
-        $this->resetErrorBag();
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedLocationFilter(): void
-    {
-        $this->resetPage();
-    }
-
-    public function updatedStatusFilter(): void
-    {
-        $this->resetPage();
-    }
-
-    public function onModalClose(): void
-    {
-        $this->resetForm();
-    }
-
-    public function toggleWorkDay(int $day): void
-    {
-        if (in_array($day, $this->workDays)) {
-            $this->workDays = array_values(array_filter($this->workDays, fn ($d) => $d !== $day));
-        } else {
-            $this->workDays[] = $day;
-            sort($this->workDays);
-        }
     }
 }

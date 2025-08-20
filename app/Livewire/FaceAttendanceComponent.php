@@ -177,33 +177,39 @@ class FaceAttendanceComponent extends Component
         $this->isEarlyCheckIn = false;
         $this->isEarlyCheckOut = false;
 
+        $today = now()->dayOfWeekIso;
+
         // Check check-in timing
         if ($this->todaysAttendance['check_in']) {
             $checkInTime = $this->todaysAttendance['check_in']->recorded_at;
-            $expectedCheckInTime = $attendance->clock_in_time;
+            $expectedCheckInTime = $attendance->getClockInTime($today);
 
-            // Compare time only (ignore date)
-            $actualTime = $checkInTime->format('H:i:s');
-            $expectedTime = $expectedCheckInTime->format('H:i:s');
+            if ($expectedCheckInTime) {
+                // Compare time only (ignore date)
+                $actualTime = $checkInTime->format('H:i');
+                $expectedTime = $expectedCheckInTime;
 
-            if ($actualTime > $expectedTime) {
-                $this->isLateCheckIn = true;
-            } elseif ($actualTime < $expectedTime) {
-                $this->isEarlyCheckIn = true;
+                if ($actualTime > $expectedTime) {
+                    $this->isLateCheckIn = true;
+                } elseif ($actualTime < $expectedTime) {
+                    $this->isEarlyCheckIn = true;
+                }
             }
         }
 
         // Check early check-out
         if ($this->todaysAttendance['check_out']) {
             $checkOutTime = $this->todaysAttendance['check_out']->recorded_at;
-            $expectedCheckOutTime = $attendance->clock_out_time;
+            $expectedCheckOutTime = $attendance->getClockOutTime($today);
 
-            // Compare time only (ignore date)
-            $actualTime = $checkOutTime->format('H:i:s');
-            $expectedTime = $expectedCheckOutTime->format('H:i:s');
+            if ($expectedCheckOutTime) {
+                // Compare time only (ignore date)
+                $actualTime = $checkOutTime->format('H:i');
+                $expectedTime = $expectedCheckOutTime;
 
-            if ($actualTime < $expectedTime) {
-                $this->isEarlyCheckOut = true;
+                if ($actualTime < $expectedTime) {
+                    $this->isEarlyCheckOut = true;
+                }
             }
         }
 
@@ -213,9 +219,9 @@ class FaceAttendanceComponent extends Component
             'is_early_check_in' => $this->isEarlyCheckIn,
             'is_early_check_out' => $this->isEarlyCheckOut,
             'check_in_actual' => $this->todaysAttendance['check_in']?->recorded_at?->format('H:i:s'),
-            'check_in_expected' => $attendance->clock_in_time?->format('H:i:s'),
+            'check_in_expected' => $attendance->getClockInTime(now()->dayOfWeekIso),
             'check_out_actual' => $this->todaysAttendance['check_out']?->recorded_at?->format('H:i:s'),
-            'check_out_expected' => $attendance->clock_out_time?->format('H:i:s'),
+            'check_out_expected' => $attendance->getClockOutTime(now()->dayOfWeekIso),
         ]);
     }
 
@@ -374,14 +380,14 @@ class FaceAttendanceComponent extends Component
         // Check if it's a valid work day
         $today = now()->dayOfWeekIso; // 1 = Monday, 7 = Sunday
 
-        if (! in_array($today, $attendance->work_days)) {
+        if (! $attendance->isWorkDay($today)) {
             throw new \Exception('Hari ini bukan hari kerja Anda');
         }
 
         // Check time constraints
         $currentTime = now()->format('H:i');
-        $clockInTime = $attendance->getFormattedClockInTime();
-        $clockOutTime = $attendance->getFormattedClockOutTime();
+        $clockInTime = $attendance->getClockInTime($today);
+        $clockOutTime = $attendance->getClockOutTime($today);
 
         // Allow check-in at any time, but mark as early if before scheduled time
         if ($this->attendanceType === 'check_in' && $currentTime < $clockInTime) {
@@ -513,19 +519,20 @@ class FaceAttendanceComponent extends Component
             // Add timing notes
             $attendance = $user->attendance;
             if ($attendance) {
+                $today = now()->dayOfWeekIso;
                 $currentTime = now()->format('H:i');
-                $clockInTime = $attendance->getFormattedClockInTime();
-                $clockOutTime = $attendance->getFormattedClockOutTime();
+                $clockInTime = $attendance->getClockInTime($today);
+                $clockOutTime = $attendance->getClockOutTime($today);
 
-                if ($this->attendanceType === 'check_in' && $currentTime < $clockInTime) {
+                if ($this->attendanceType === 'check_in' && $clockInTime && $currentTime < $clockInTime) {
                     $notes[] = 'Check-in lebih awal (jadwal: '.$clockInTime.')';
-                } elseif ($this->attendanceType === 'check_in' && $currentTime > $clockInTime) {
+                } elseif ($this->attendanceType === 'check_in' && $clockInTime && $currentTime > $clockInTime) {
                     $notes[] = 'Check-in terlambat (jadwal: '.$clockInTime.')';
                 }
 
-                if ($this->attendanceType === 'check_out' && $currentTime < $clockOutTime) {
+                if ($this->attendanceType === 'check_out' && $clockOutTime && $currentTime < $clockOutTime) {
                     $notes[] = 'Check-out lebih awal (jadwal: '.$clockOutTime.')';
-                } elseif ($this->attendanceType === 'check_out' && $currentTime > $clockOutTime) {
+                } elseif ($this->attendanceType === 'check_out' && $clockOutTime && $currentTime > $clockOutTime) {
                     $notes[] = 'Check-out sesuai/melebihi jadwal (jadwal: '.$clockOutTime.')';
                 }
             }
@@ -557,11 +564,12 @@ class FaceAttendanceComponent extends Component
         $message = "Absensi {$type} berhasil untuk {$user->name} pada {$time}";
 
         // Add timing status
+        $today = now()->dayOfWeekIso;
         if ($this->attendanceType === 'check_in' && $this->isLateCheckIn) {
-            $expectedTime = $user->attendance?->getFormattedClockInTime();
+            $expectedTime = $user->attendance?->getClockInTime($today);
             $message .= " (Terlambat - Jam kerja: {$expectedTime})";
         } elseif ($this->attendanceType === 'check_out' && $this->isEarlyCheckOut) {
-            $expectedTime = $user->attendance?->getFormattedClockOutTime();
+            $expectedTime = $user->attendance?->getClockOutTime($today);
             $message .= " (Pulang cepat - Jam kerja: {$expectedTime})";
         }
 
@@ -625,14 +633,16 @@ class FaceAttendanceComponent extends Component
 
         if ($this->isLateCheckIn) {
             $user = auth()->user();
-            $expectedTime = $user?->attendance?->getFormattedClockInTime();
+            $today = now()->dayOfWeekIso;
+            $expectedTime = $user?->attendance?->getClockInTime($today);
 
             return " (Terlambat - Jam kerja: {$expectedTime})";
         }
 
         if ($this->isEarlyCheckIn) {
             $user = auth()->user();
-            $expectedTime = $user?->attendance?->getFormattedClockInTime();
+            $today = now()->dayOfWeekIso;
+            $expectedTime = $user?->attendance?->getClockInTime($today);
 
             return " (Datang lebih awal - Jam kerja: {$expectedTime})";
         }
@@ -648,7 +658,8 @@ class FaceAttendanceComponent extends Component
 
         if ($this->isEarlyCheckOut) {
             $user = auth()->user();
-            $expectedTime = $user?->attendance?->getFormattedClockOutTime();
+            $today = now()->dayOfWeekIso;
+            $expectedTime = $user?->attendance?->getClockOutTime($today);
 
             return " (Pulang cepat - Jam kerja: {$expectedTime})";
         }

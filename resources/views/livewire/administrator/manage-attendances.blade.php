@@ -92,9 +92,7 @@
                                 <div class="text-sm text-zinc-500">{{ $attendance->location->address }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-zinc-900">
-                                    {{ $attendance->getFormattedClockInTime() }} - {{ $attendance->getFormattedClockOutTime() }}
-                                </div>
+                                <div class="text-sm text-zinc-900">{{ $attendance->getFormattedSchedule() }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-zinc-900">{{ $attendance->getWorkDaysText() }}</div>
@@ -172,40 +170,44 @@
                 @endforeach
             </flux:select>
 
-            <div class="grid grid-cols-2 gap-4">
-                <flux:input
-                    wire:model="clockInTime"
-                    label="Jam Masuk Kerja"
-                    type="time"
-                    required
-                />
-                <flux:input
-                    wire:model="clockOutTime"
-                    label="Jam Keluar Kerja"
-                    type="time"
-                    required
-                />
-            </div>
-
             <div>
-                <flux:heading size="sm" class="mb-3">Hari Kerja</flux:heading>
-                <div class="grid grid-cols-7 gap-2">
+                <flux:heading size="sm" class="mb-3">Jadwal Harian</flux:heading>
+                <div class="space-y-4">
                     @php
                         $days = [
-                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam',
-                            5 => 'Jum', 6 => 'Sab', 7 => 'Min'
+                            1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis',
+                            5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'
                         ];
                     @endphp
                     @foreach($days as $dayNum => $dayName)
-                        <flux:button
-                            type="button"
-                            variant="{{ in_array($dayNum, $workDays) ? 'primary' : 'ghost' }}"
-                            size="sm"
-                            wire:click="toggleWorkDay({{ $dayNum }})"
-                            class="w-full"
-                        >
-                            {{ $dayName }}
-                        </flux:button>
+                        <div class="border border-zinc-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <flux:switch
+                                    wire:click="toggleWorkDay({{ $dayNum }})"
+                                    :checked="isset($dailySchedules[{{ $dayNum }}])"
+                                />
+                                <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                            </div>
+                            
+                            @if(isset($dailySchedules[$dayNum]))
+                                <div class="grid grid-cols-2 gap-3 ml-8">
+                                    <flux:input
+                                        wire:model="dailySchedules.{{ $dayNum }}.clock_in"
+                                        label="Jam Masuk"
+                                        type="time"
+                                        size="sm"
+                                        required
+                                    />
+                                    <flux:input
+                                        wire:model="dailySchedules.{{ $dayNum }}.clock_out"
+                                        label="Jam Keluar"
+                                        type="time"
+                                        size="sm"
+                                        required
+                                    />
+                                </div>
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             </div>
@@ -255,40 +257,44 @@
                 @endforeach
             </flux:select>
 
-            <div class="grid grid-cols-2 gap-4">
-                <flux:input
-                    wire:model="clockInTime"
-                    label="Jam Masuk Kerja"
-                    type="time"
-                    required
-                />
-                <flux:input
-                    wire:model="clockOutTime"
-                    label="Jam Keluar Kerja"
-                    type="time"
-                    required
-                />
-            </div>
-
             <div>
-                <flux:heading size="sm" class="mb-3">Hari Kerja</flux:heading>
-                <div class="grid grid-cols-7 gap-2">
+                <flux:heading size="sm" class="mb-3">Jadwal Harian</flux:heading>
+                <div class="space-y-4">
                     @php
                         $days = [
-                            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam',
-                            5 => 'Jum', 6 => 'Sab', 7 => 'Min'
+                            1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis',
+                            5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'
                         ];
                     @endphp
                     @foreach($days as $dayNum => $dayName)
-                        <flux:button
-                            type="button"
-                            variant="{{ in_array($dayNum, $workDays) ? 'primary' : 'ghost' }}"
-                            size="sm"
-                            wire:click="toggleWorkDay({{ $dayNum }})"
-                            class="w-full"
-                        >
-                            {{ $dayName }}
-                        </flux:button>
+                        <div class="border border-zinc-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <flux:switch
+                                    wire:click="toggleWorkDay({{ $dayNum }})"
+                                    :checked="isset($dailySchedules[{{ $dayNum }}])"
+                                />
+                                <span class="font-medium text-zinc-900">{{ $dayName }}</span>
+                            </div>
+                            
+                            @if(isset($dailySchedules[$dayNum]))
+                                <div class="grid grid-cols-2 gap-3 ml-8">
+                                    <flux:input
+                                        wire:model="dailySchedules.{{ $dayNum }}.clock_in"
+                                        label="Jam Masuk"
+                                        type="time"
+                                        size="sm"
+                                        required
+                                    />
+                                    <flux:input
+                                        wire:model="dailySchedules.{{ $dayNum }}.clock_out"
+                                        label="Jam Keluar"
+                                        type="time"
+                                        size="sm"
+                                        required
+                                    />
+                                </div>
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             </div>

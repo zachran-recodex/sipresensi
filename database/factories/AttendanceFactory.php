@@ -32,12 +32,31 @@ class AttendanceFactory extends Factory
             $workDays->push(6);
         }
 
+        // Generate daily schedules for work days
+        $dailySchedules = [];
+        foreach ($workDays as $day) {
+            $clockIn = fake()->time('H:i', '08:00'); // Between 07:00-09:00
+            $clockOut = fake()->time('H:i', '17:00'); // Between 16:00-18:00
+
+            // Ensure clock out is after clock in
+            $clockInTime = \Carbon\Carbon::createFromFormat('H:i', $clockIn);
+            $clockOutTime = \Carbon\Carbon::createFromFormat('H:i', $clockOut);
+
+            if ($clockOutTime <= $clockInTime) {
+                $clockOutTime = $clockInTime->copy()->addHours(8); // Add 8 hours
+                $clockOut = $clockOutTime->format('H:i');
+            }
+
+            $dailySchedules[$day] = [
+                'clock_in' => $clockIn,
+                'clock_out' => $clockOut,
+            ];
+        }
+
         return [
             'user_id' => User::factory(),
             'location_id' => Location::factory(),
-            'clock_in_time' => fake()->time('H:i', '08:00'), // Between 07:00-09:00
-            'clock_out_time' => fake()->time('H:i', '17:00'), // Between 16:00-18:00
-            'work_days' => $workDays->toArray(),
+            'daily_schedules' => $dailySchedules,
             'is_active' => true,
         ];
     }
@@ -58,7 +77,13 @@ class AttendanceFactory extends Factory
     public function weekdays(): static
     {
         return $this->state(fn (array $attributes) => [
-            'work_days' => [1, 2, 3, 4, 5], // Monday to Friday
+            'daily_schedules' => [
+                1 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Monday
+                2 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Tuesday
+                3 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Wednesday
+                4 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Thursday
+                5 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Friday
+            ],
         ]);
     }
 
@@ -68,7 +93,14 @@ class AttendanceFactory extends Factory
     public function includingSaturday(): static
     {
         return $this->state(fn (array $attributes) => [
-            'work_days' => [1, 2, 3, 4, 5, 6], // Monday to Saturday
+            'daily_schedules' => [
+                1 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Monday
+                2 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Tuesday
+                3 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Wednesday
+                4 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Thursday
+                5 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Friday
+                6 => ['clock_in' => '09:00', 'clock_out' => '17:00'], // Saturday
+            ],
         ]);
     }
 
@@ -77,10 +109,19 @@ class AttendanceFactory extends Factory
      */
     public function earlyShift(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'clock_in_time' => '07:00',
-            'clock_out_time' => '15:00',
-        ]);
+        return $this->state(function (array $attributes) {
+            $dailySchedules = [];
+
+            // Apply early shift to all work days
+            foreach ([1, 2, 3, 4, 5] as $day) {
+                $dailySchedules[$day] = [
+                    'clock_in' => '07:00',
+                    'clock_out' => '15:00',
+                ];
+            }
+
+            return ['daily_schedules' => $dailySchedules];
+        });
     }
 
     /**
@@ -88,9 +129,18 @@ class AttendanceFactory extends Factory
      */
     public function lateShift(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'clock_in_time' => '14:00',
-            'clock_out_time' => '22:00',
-        ]);
+        return $this->state(function (array $attributes) {
+            $dailySchedules = [];
+
+            // Apply late shift to all work days
+            foreach ([1, 2, 3, 4, 5] as $day) {
+                $dailySchedules[$day] = [
+                    'clock_in' => '14:00',
+                    'clock_out' => '22:00',
+                ];
+            }
+
+            return ['daily_schedules' => $dailySchedules];
+        });
     }
 }

@@ -19,9 +19,7 @@ class Attendance extends Model
     protected $fillable = [
         'user_id',
         'location_id',
-        'clock_in_time',
-        'clock_out_time',
-        'work_days',
+        'daily_schedules',
         'is_active',
     ];
 
@@ -33,9 +31,7 @@ class Attendance extends Model
     protected function casts(): array
     {
         return [
-            'clock_in_time' => 'datetime:H:i',
-            'clock_out_time' => 'datetime:H:i',
-            'work_days' => 'array',
+            'daily_schedules' => 'array',
             'is_active' => 'boolean',
         ];
     }
@@ -65,22 +61,6 @@ class Attendance extends Model
     }
 
     /**
-     * Get formatted clock in time.
-     */
-    public function getFormattedClockInTime(): string
-    {
-        return $this->clock_in_time->format('H:i');
-    }
-
-    /**
-     * Get formatted clock out time.
-     */
-    public function getFormattedClockOutTime(): string
-    {
-        return $this->clock_out_time->format('H:i');
-    }
-
-    /**
      * Get work days as readable text.
      */
     public function getWorkDaysText(): string
@@ -95,11 +75,16 @@ class Attendance extends Model
             7 => 'Minggu',
         ];
 
-        $selectedDays = collect($this->work_days)
-            ->map(fn ($day) => $dayNames[$day] ?? $day)
+        if (! $this->daily_schedules) {
+            return 'Tidak ada jadwal kerja';
+        }
+
+        $workDays = collect($this->daily_schedules)
+            ->keys()
+            ->map(fn ($day) => $dayNames[(int) $day] ?? $day)
             ->implode(', ');
 
-        return $selectedDays ?: 'Tidak ada hari kerja';
+        return $workDays ?: 'Tidak ada jadwal kerja';
     }
 
     /**
@@ -107,7 +92,88 @@ class Attendance extends Model
      */
     public function isWorkDay(int $dayNumber): bool
     {
-        return in_array($dayNumber, $this->work_days ?? []);
+        return isset($this->daily_schedules[$dayNumber]);
+    }
+
+    /**
+     * Get schedule for a specific day.
+     */
+    public function getDaySchedule(int $dayNumber): ?array
+    {
+        return $this->daily_schedules[$dayNumber] ?? null;
+    }
+
+    /**
+     * Get formatted schedule for display.
+     */
+    public function getFormattedSchedule(): string
+    {
+        if (! $this->daily_schedules) {
+            return 'Tidak ada jadwal';
+        }
+
+        $dayNames = [
+            1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam',
+            5 => 'Jum', 6 => 'Sab', 7 => 'Min',
+        ];
+
+        $schedules = [];
+        foreach ($this->daily_schedules as $day => $schedule) {
+            $dayName = $dayNames[(int) $day] ?? $day;
+            $schedules[] = "{$dayName}: {$schedule['clock_in']}-{$schedule['clock_out']}";
+        }
+
+        return implode(', ', $schedules);
+    }
+
+    /**
+     * Get clock in time for a specific day.
+     */
+    public function getClockInTime(int $dayNumber): ?string
+    {
+        $schedule = $this->getDaySchedule($dayNumber);
+
+        return $schedule ? $schedule['clock_in'] : null;
+    }
+
+    /**
+     * Get clock out time for a specific day.
+     */
+    public function getClockOutTime(int $dayNumber): ?string
+    {
+        $schedule = $this->getDaySchedule($dayNumber);
+
+        return $schedule ? $schedule['clock_out'] : null;
+    }
+
+    /**
+     * Get default clock in time (for backward compatibility).
+     */
+    public function getFormattedClockInTime(): string
+    {
+        if (! $this->daily_schedules) {
+            return '-';
+        }
+
+        // Get the first day's clock in time
+        $firstDay = array_key_first($this->daily_schedules);
+
+        return $this->daily_schedules[$firstDay]['clock_in'] ?? '-';
+    }
+
+    /**
+     * Get default clock out time (for backward compatibility).
+     */
+    public function getFormattedClockOutTime(): string
+    {
+        if (! $this->daily_schedules) {
+            return '-';
+        }
+
+        // Get the first day's clock out time
+        $firstDay = array_key_first($this->daily_schedules);
+
+        return $this->daily_schedules[$firstDay]['clock_out'] ?? '-';
     }
 
     /**

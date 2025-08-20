@@ -46,11 +46,11 @@
                     </div>
                     <div>
                         <span class="text-zinc-500 font-medium">Bergabung:</span>
-                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->created_at->format('d M Y H:i') }}</div>
+                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->created_at->locale('id')->isoFormat('DD MMMM YYYY HH:mm') }}</div>
                     </div>
                     <div>
                         <span class="text-zinc-500 font-medium">Terakhir Update:</span>
-                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->updated_at->format('d M Y H:i') }}</div>
+                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->updated_at->locale('id')->isoFormat('DD MMMM YYYY HH:mm') }}</div>
                     </div>
                     <div>
                         <span class="text-zinc-500 font-medium">Status Wajah:</span>
@@ -92,7 +92,7 @@
                 </div>
                 <div>
                     <span class="text-zinc-500 font-medium">Tanggal Daftar:</span>
-                    <div class="mt-1 font-semibold text-zinc-900">{{ $user->faceEnrollment->enrolled_at?->format('d M Y H:i') ?? 'N/A' }}</div>
+                    <div class="mt-1 font-semibold text-zinc-900">{{ $user->faceEnrollment->enrolled_at?->locale('id')->isoFormat('DD MMMM YYYY HH:mm') ?? 'N/A' }}</div>
                 </div>
                 <div>
                     <span class="text-zinc-500 font-medium">Status:</span>
@@ -120,13 +120,9 @@
                         <span class="text-zinc-500 font-medium">Alamat:</span>
                         <div class="mt-1 font-semibold text-zinc-900">{{ $user->attendance->location->address ?? 'N/A' }}</div>
                     </div>
-                    <div>
-                        <span class="text-zinc-500 font-medium">Jam Masuk:</span>
-                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->attendance->getFormattedClockInTime() }}</div>
-                    </div>
-                    <div>
-                        <span class="text-zinc-500 font-medium">Jam Keluar:</span>
-                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->attendance->getFormattedClockOutTime() }}</div>
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <span class="text-zinc-500 font-medium">Jadwal Kerja:</span>
+                        <div class="mt-1 font-semibold text-zinc-900">{{ $user->attendance->getFormattedSchedule() }}</div>
                     </div>
                     <div>
                         <span class="text-zinc-500 font-medium">Status:</span>
@@ -171,7 +167,7 @@
                             @foreach($user->attendanceRecords->take(15) as $record)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
-                                        {{ $record->attendance_date->format('d M Y') }}
+                                        {{ $record->attendance_date->locale('id')->isoFormat('DD MMMM YYYY') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                                         {{ $record->clock_in_time ? $record->clock_in_time->format('H:i') : '-' }}

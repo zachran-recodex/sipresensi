@@ -21,7 +21,6 @@ class ShowUser extends Component
 
     public function render()
     {
-        return view('livewire.administrator.show-user')
-            ->layout('components.layouts.app');
+        return view('livewire.administrator.show-user');
     }
 }
