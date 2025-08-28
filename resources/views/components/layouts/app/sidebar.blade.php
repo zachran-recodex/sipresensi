@@ -2,6 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
+
+        <title>{{ $title ?? config('app.name') }}</title>
     </head>
     <body class="min-h-screen bg-white">
         <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50">
@@ -16,7 +18,7 @@
 
                 @if(auth()->user()->hasRole('super admin') || auth()->user()->hasRole('admin'))
                     <flux:navlist.group heading="Administrator" class="grid" >
-                        <flux:navlist.item icon="users" :href="route('administrator.manage-users')" :current="request()->routeIs('administrator.manage-users')" wire:navigate>Kelola Pengguna</flux:navlist.item>
+                        <flux:navlist.item icon="users" :href="route('administrator.manage-users')" :current="request()->routeIs('administrator.manage-users')" wire:navigate>Kelola Karyawan</flux:navlist.item>
                         <flux:navlist.item icon="map-pin" :href="route('administrator.manage-locations')" :current="request()->routeIs('administrator.manage-locations')" wire:navigate>Kelola Lokasi</flux:navlist.item>
                         <flux:navlist.item icon="clock" :href="route('administrator.manage-attendances')" :current="request()->routeIs('administrator.manage-attendances')" wire:navigate>Kelola Kehadiran</flux:navlist.item>
                         <flux:navlist.item icon="document-text" :href="route('administrator.attendance-reports')" :current="request()->routeIs('administrator.attendance-reports')" wire:navigate>Laporan Absensi</flux:navlist.item>

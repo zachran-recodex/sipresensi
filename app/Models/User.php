@@ -96,6 +96,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Find the user instance for authentication.
+     */
+    public function findForAuth(string $identifier): ?User
+    {
+        return $this->where('username', $identifier)->first();
+    }
+
+    /**
      * Find the user instance for the given username.
      */
     public function findForPassport(string $username): ?User

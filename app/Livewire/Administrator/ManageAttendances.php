@@ -37,7 +37,7 @@ class ManageAttendances extends Component
         'locationId' => 'required|exists:locations,id',
         'dailySchedules' => 'required|array|min:1',
         'dailySchedules.*.clock_in' => 'required|date_format:H:i',
-        'dailySchedules.*.clock_out' => 'required|date_format:H:i|after:dailySchedules.*.clock_in',
+        'dailySchedules.*.clock_out' => 'required|date_format:H:i',
         'isActive' => 'boolean',
     ];
 
@@ -56,7 +56,9 @@ class ManageAttendances extends Component
     ];
 
     protected $listeners = [
+        'attendanceCreated' => '$refresh',
         'attendanceUpdated' => '$refresh',
+        'attendanceDeleted' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 
@@ -85,6 +87,9 @@ class ManageAttendances extends Component
 
     public function createAttendance(): void
     {
+        // Custom validation for clock times
+        $this->validateClockTimes();
+
         $this->validate();
 
         Attendance::create([
@@ -102,6 +107,9 @@ class ManageAttendances extends Component
 
     public function updateAttendance(): void
     {
+        // Custom validation for clock times
+        $this->validateClockTimes();
+
         $this->validate();
 
         $attendance = Attendance::findOrFail($this->selectedAttendanceId);
@@ -167,11 +175,15 @@ class ManageAttendances extends Component
         if (isset($this->dailySchedules[$day])) {
             unset($this->dailySchedules[$day]);
         } else {
+            // Set default working hours when toggling a work day
             $this->dailySchedules[$day] = [
                 'clock_in' => '09:00',
                 'clock_out' => '17:00',
             ];
         }
+
+        // Ensure the component is updated immediately
+        $this->dispatch('scheduleUpdated');
     }
 
     public function updateDaySchedule(int $day, string $field, string $value): void
@@ -184,6 +196,31 @@ class ManageAttendances extends Component
         }
 
         $this->dailySchedules[$day][$field] = $value;
+    }
+
+    protected function validateClockTimes(): void
+    {
+        foreach ($this->dailySchedules as $day => $schedule) {
+            if (isset($schedule['clock_in'], $schedule['clock_out'])) {
+                $clockIn = \DateTime::createFromFormat('H:i', $schedule['clock_in']);
+                $clockOut = \DateTime::createFromFormat('H:i', $schedule['clock_out']);
+
+                // Allow clock_out to be the next day (e.g., night shift)
+                if ($clockOut <= $clockIn) {
+                    $clockOut->add(new \DateInterval('P1D')); // Add 1 day
+                }
+
+                // Still validate that there's at least 1 hour difference
+                $diff = $clockIn->diff($clockOut);
+                $totalMinutes = ($diff->h * 60) + $diff->i;
+
+                if ($totalMinutes < 60) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        "dailySchedules.{$day}.clock_out" => 'Jam keluar kerja harus minimal 1 jam setelah jam masuk kerja.',
+                    ]);
+                }
+            }
+        }
     }
 
     public function render()

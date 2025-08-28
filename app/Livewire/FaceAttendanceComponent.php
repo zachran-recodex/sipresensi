@@ -273,37 +273,73 @@ class FaceAttendanceComponent extends Component
             $response = $this->biznetFaceService->identifyFace($this->capturedImage);
 
             // Log response for debugging
-            Log::info('Biznet Face API identify response', ['response' => $response]);
+            Log::info('Biznet Face API identify response', [
+                'response' => $response,
+                'auth_user_id' => auth()->id(),
+            ]);
 
             // Check if response has the risetai structure
             $apiResponse = $response['risetai'] ?? $response;
+            $status = $apiResponse['status'] ?? $response['status'] ?? null;
 
-            if (($apiResponse['status'] ?? $response['status'] ?? null) !== '200') {
-                throw new \Exception($apiResponse['status_message'] ?? $response['status_message'] ?? 'Gagal mengidentifikasi wajah');
+            if ($status !== '200' && $status !== 200) {
+                $errorMsg = $apiResponse['status_message'] ?? $response['status_message'] ?? 'Gagal mengidentifikasi wajah';
+                Log::error('Face identification API error', [
+                    'status' => $status,
+                    'message' => $errorMsg,
+                    'full_response' => $response,
+                ]);
+                throw new \Exception($errorMsg);
             }
 
             // The identify API returns data in 'return' array, not 'data'
-            $returnData = $apiResponse['return'] ?? [];
+            $returnData = $apiResponse['return'] ?? $apiResponse['data'] ?? [];
 
-            if (empty($returnData) || ! isset($returnData[0]['user_id'])) {
+            if (empty($returnData) || ! is_array($returnData)) {
+                Log::warning('Empty or invalid return data from face API', [
+                    'return_data' => $returnData,
+                    'full_response' => $response,
+                ]);
+                throw new \Exception('Wajah tidak dikenali. Pastikan Anda sudah terdaftar dan wajah terlihat jelas.');
+            }
+
+            $responseData = is_array($returnData) ? $returnData[0] : $returnData;
+
+            if (! isset($responseData['user_id'])) {
+                Log::warning('No user_id in face API response', [
+                    'response_data' => $responseData,
+                    'full_response' => $response,
+                ]);
                 throw new \Exception('Wajah tidak dikenali. Pastikan Anda sudah terdaftar.');
             }
 
-            $responseData = $returnData[0]; // Get first (and should be only) result
             $biznetUserId = $responseData['user_id'];
 
+            // Look up the face enrollment with additional debugging
             $faceEnrollment = \App\Models\FaceEnrollment::where('biznet_user_id', $biznetUserId)
                 ->where('is_active', true)
                 ->first();
 
-            Log::info('Face enrollment lookup', [
+            // If not found, try to find any enrollment for debugging
+            if (! $faceEnrollment) {
+                $allEnrollments = \App\Models\FaceEnrollment::where('biznet_user_id', $biznetUserId)->get();
+                Log::error('Face enrollment not found - detailed lookup', [
+                    'biznet_user_id' => $biznetUserId,
+                    'all_enrollments_with_this_id' => $allEnrollments->toArray(),
+                    'active_enrollments_count' => \App\Models\FaceEnrollment::where('is_active', true)->count(),
+                    'total_enrollments_count' => \App\Models\FaceEnrollment::count(),
+                ]);
+            }
+
+            Log::info('Face enrollment lookup result', [
                 'biznet_user_id' => $biznetUserId,
                 'enrollment_found' => $faceEnrollment ? true : false,
-                'enrollment_data' => $faceEnrollment,
+                'enrollment_id' => $faceEnrollment?->id,
+                'enrollment_user_id' => $faceEnrollment?->user_id,
             ]);
 
             if (! $faceEnrollment) {
-                throw new \Exception('Data enrollment tidak ditemukan');
+                throw new \Exception('Data enrollment tidak ditemukan. Silahkan hubungi administrator untuk mengecek registrasi wajah Anda.');
             }
 
             $user = $faceEnrollment->user;

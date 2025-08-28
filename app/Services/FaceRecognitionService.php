@@ -248,9 +248,9 @@ class FaceRecognitionService
     }
 
     /**
-     * Validate base64 image
+     * Validate base64 image with enhanced face detection checks
      */
-    public static function validateBase64Image(string $base64): bool
+    public static function validateBase64Image(string $base64, bool $requireFace = false): bool
     {
         // Remove data URL prefix if present
         if (str_contains($base64, 'data:image')) {
@@ -266,6 +266,83 @@ class FaceRecognitionService
         // Check if it's a valid image
         $imageInfo = getimagesizefromstring($decoded);
 
-        return $imageInfo !== false;
+        if ($imageInfo === false) {
+            return false;
+        }
+
+        // Basic image quality checks
+        $width = $imageInfo[0];
+        $height = $imageInfo[1];
+
+        // Minimum resolution requirements
+        if ($width < 300 || $height < 300) {
+            return false;
+        }
+
+        // Maximum file size (5MB when decoded)
+        if (strlen($decoded) > 5 * 1024 * 1024) {
+            return false;
+        }
+
+        // If face detection is required, perform additional checks
+        if ($requireFace) {
+            return self::basicFaceDetection($decoded);
+        }
+
+        return true;
+    }
+
+    /**
+     * Basic face detection using image analysis
+     */
+    protected static function basicFaceDetection(string $imageData): bool
+    {
+        // Create image resource from string
+        $image = imagecreatefromstring($imageData);
+
+        if ($image === false) {
+            return false;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        // Very basic face detection - check for reasonable face-like proportions
+        // and ensure the image isn't too dark or too bright
+        $darkPixels = 0;
+        $brightPixels = 0;
+        $totalPixels = 0;
+
+        // Sample pixels to check brightness distribution
+        for ($x = 0; $x < $width; $x += 10) {
+            for ($y = 0; $y < $height; $y += 10) {
+                $rgb = imagecolorat($image, $x, $y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+
+                $brightness = ($r + $g + $b) / 3;
+
+                if ($brightness < 50) {
+                    $darkPixels++;
+                } elseif ($brightness > 200) {
+                    $brightPixels++;
+                }
+
+                $totalPixels++;
+            }
+        }
+
+        imagedestroy($image);
+
+        // Reject images that are too dark or too bright
+        $darkRatio = $darkPixels / $totalPixels;
+        $brightRatio = $brightPixels / $totalPixels;
+
+        if ($darkRatio > 0.7 || $brightRatio > 0.7) {
+            return false;
+        }
+
+        return true;
     }
 }

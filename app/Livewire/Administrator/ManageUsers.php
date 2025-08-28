@@ -45,7 +45,10 @@ class ManageUsers extends Component
     ];
 
     protected $listeners = [
+        'userCreated' => '$refresh',
         'userUpdated' => '$refresh',
+        'userDeleted' => '$refresh',
+        'faceEnrollmentDeleted' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 
@@ -156,7 +159,7 @@ class ManageUsers extends Component
 
         // Assign selected roles or default to karyawan if none selected
         if (! empty($this->selectedRoles)) {
-            $user->assignRoles($this->selectedRoles);
+            $user->syncRoles($this->selectedRoles);
         } else {
             $user->assignRole('karyawan');
         }
@@ -258,5 +261,44 @@ class ManageUsers extends Component
     {
         // Reset form when modal is closed
         $this->resetForm();
+    }
+
+    public function deleteFaceEnrollment(int $userId): void
+    {
+        try {
+            $user = User::findOrFail($userId);
+
+            // Get face enrollment
+            $faceEnrollment = $user->faceEnrollment()->where('is_active', true)->first();
+
+            if (! $faceEnrollment) {
+                session()->flash('error', 'Pengguna tidak memiliki data wajah yang aktif.');
+
+                return;
+            }
+
+            // Delete from Biznet API first
+            try {
+                $faceService = app(\App\Services\FaceRecognitionService::class);
+                $faceService->deleteFace($faceEnrollment->biznet_user_id);
+            } catch (\Exception $e) {
+                // Log but don't fail if API deletion fails
+                \Log::warning('Failed to delete face from Biznet API', [
+                    'biznet_user_id' => $faceEnrollment->biznet_user_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Deactivate enrollment in database
+            $faceEnrollment->update(['is_active' => false]);
+
+            session()->flash('message', "Data wajah untuk {$user->name} berhasil dihapus. User dapat mendaftar ulang.");
+
+            // Refresh the component
+            $this->dispatch('faceEnrollmentDeleted');
+
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal menghapus data wajah: '.$e->getMessage());
+        }
     }
 }

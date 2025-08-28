@@ -42,7 +42,9 @@ class ManageLocations extends Component
     ];
 
     protected $listeners = [
+        'locationCreated' => '$refresh',
         'locationUpdated' => '$refresh',
+        'locationDeleted' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 

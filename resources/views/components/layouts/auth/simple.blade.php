@@ -2,6 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
+
+        <title>{{ $title ?? config('app.name') }}</title>
     </head>
     <body class="min-h-screen bg-white antialiased">
         <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-8 p-8 md:p-12">

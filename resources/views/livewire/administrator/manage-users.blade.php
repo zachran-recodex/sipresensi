@@ -3,8 +3,8 @@
         <!-- Header -->
         <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
             <div>
-                <flux:heading size="xl">Kelola Pengguna</flux:heading>
-                <flux:subheading>Buat, edit, hapus pengguna dan kelola role mereka</flux:subheading>
+                <flux:heading size="xl">Kelola Karyawan</flux:heading>
+                <flux:subheading>Buat, edit, hapus karyawan dan kelola role mereka</flux:subheading>
             </div>
             <flux:button x-on:click="$wire.resetForm(); $flux.modal('create-user').show()" variant="primary" icon="plus" class="w-full md:w-auto">
                 Tambah
@@ -144,6 +144,21 @@
                                         <span class="md:hidden">Lihat {{ $user->name }}</span>
                                         <span class="hidden md:inline">Lihat</span>
                                     </flux:button>
+
+                                    <!-- Face enrollment deletion button - only for karyawan with face enrollment -->
+                                    @if($user->hasRole('karyawan') && $user->faceEnrollment && $user->faceEnrollment->is_active)
+                                        <flux:button
+                                            x-on:click="if(confirm('Yakin ingin menghapus data wajah untuk {{ $user->name }}? User harus mendaftar ulang.')) { $wire.deleteFaceEnrollment({{ $user->id }}) }"
+                                            size="sm"
+                                            variant="primary"
+                                            color="yellow"
+                                            icon="trash"
+                                            class="w-full md:w-auto"
+                                        >
+                                            <span class="md:hidden">Hapus Wajah {{ $user->name }}</span>
+                                            <span class="hidden md:inline">Hapus Wajah</span>
+                                        </flux:button>
+                                    @endif
 
                                     @if($viewMode === 'super-admin')
                                         <!-- Super Admin users - only super admin can manage them -->
