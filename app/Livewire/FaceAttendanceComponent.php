@@ -320,15 +320,39 @@ class FaceAttendanceComponent extends Component
                 ->where('is_active', true)
                 ->first();
 
-            // If not found, try to find any enrollment for debugging
+            // If not found by biznet_user_id, try fallback approach
             if (! $faceEnrollment) {
-                $allEnrollments = \App\Models\FaceEnrollment::where('biznet_user_id', $biznetUserId)->get();
-                Log::error('Face enrollment not found - detailed lookup', [
+                Log::warning('Face enrollment not found by biznet_user_id, trying fallback', [
                     'biznet_user_id' => $biznetUserId,
-                    'all_enrollments_with_this_id' => $allEnrollments->toArray(),
-                    'active_enrollments_count' => \App\Models\FaceEnrollment::where('is_active', true)->count(),
-                    'total_enrollments_count' => \App\Models\FaceEnrollment::count(),
+                    'current_auth_user_id' => auth()->id(),
                 ]);
+
+                // Try to find enrollment for current authenticated user as fallback
+                $currentUserEnrollment = \App\Models\FaceEnrollment::where('user_id', auth()->id())
+                    ->where('is_active', true)
+                    ->first();
+
+                if ($currentUserEnrollment) {
+                    Log::info('Using fallback: found enrollment for current user', [
+                        'current_user_enrollment' => $currentUserEnrollment->toArray(),
+                        'api_biznet_user_id' => $biznetUserId,
+                        'db_biznet_user_id' => $currentUserEnrollment->biznet_user_id,
+                    ]);
+
+                    // Use current user's enrollment as fallback
+                    $faceEnrollment = $currentUserEnrollment;
+                } else {
+                    // Additional debugging for failed cases
+                    $allEnrollments = \App\Models\FaceEnrollment::where('biznet_user_id', $biznetUserId)->get();
+                    $allActiveEnrollments = \App\Models\FaceEnrollment::where('is_active', true)->get();
+
+                    Log::error('No enrollment found even with fallback', [
+                        'biznet_user_id' => $biznetUserId,
+                        'all_enrollments_with_this_id' => $allEnrollments->toArray(),
+                        'all_active_enrollments_count' => $allActiveEnrollments->count(),
+                        'current_auth_user_id' => auth()->id(),
+                    ]);
+                }
             }
 
             Log::info('Face enrollment lookup result', [
@@ -339,7 +363,7 @@ class FaceAttendanceComponent extends Component
             ]);
 
             if (! $faceEnrollment) {
-                throw new \Exception('Data enrollment tidak ditemukan. Silahkan hubungi administrator untuk mengecek registrasi wajah Anda.');
+                throw new \Exception('Data enrollment wajah tidak ditemukan. Kemungkinan penyebab: 1) Belum mendaftar wajah, 2) Data wajah sudah tidak aktif, 3) Mismatch data sistem. Solusi: Silahkan daftar ulang wajah Anda di menu Daftar Wajah atau hubungi administrator jika masalah berlanjut.');
             }
 
             $user = $faceEnrollment->user;

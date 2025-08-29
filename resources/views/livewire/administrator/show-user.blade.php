@@ -156,36 +156,32 @@
                     <table class="min-w-full divide-y divide-zinc-200">
                         <thead class="bg-zinc-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Masuk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Keluar</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Tanggal & Waktu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Tipe</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Metode</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Lokasi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Catatan</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-zinc-200">
                             @foreach($user->attendanceRecords->take(15) as $record)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
-                                        {{ $record->attendance_date->locale('id')->isoFormat('DD MMMM YYYY') }}
+                                        {{ $record->recorded_at->locale('id')->isoFormat('DD MMMM YYYY HH:mm') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
-                                        {{ $record->clock_in_time ? $record->clock_in_time->format('H:i') : '-' }}
+                                        <flux:badge size="sm" color="{{ $record->type === 'check_in' ? 'green' : 'red' }}">
+                                            {{ $record->type === 'check_in' ? 'Masuk' : 'Keluar' }}
+                                        </flux:badge>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
-                                        {{ $record->clock_out_time ? $record->clock_out_time->format('H:i') : '-' }}
+                                        {{ ucfirst(str_replace('_', ' ', $record->method)) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
                                         {{ $record->location->name ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
-                                        @if(isset($record->is_approved))
-                                            <flux:badge size="sm" color="{{ $record->is_approved ? 'green' : 'amber' }}">
-                                                {{ $record->is_approved ? 'Disetujui' : 'Menunggu' }}
-                                            </flux:badge>
-                                        @else
-                                            <span class="text-zinc-400">-</span>
-                                        @endif
+                                        {{ $record->notes ?? '-' }}
                                     </td>
                                 </tr>
                             @endforeach

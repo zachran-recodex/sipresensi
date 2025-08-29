@@ -49,6 +49,8 @@ class ManageUsers extends Component
         'userUpdated' => '$refresh',
         'userDeleted' => '$refresh',
         'faceEnrollmentDeleted' => '$refresh',
+        'searchUpdated' => '$refresh',
+        'roleFilterUpdated' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 
@@ -165,9 +167,9 @@ class ManageUsers extends Component
         }
 
         $this->resetForm();
-        $this->dispatch('userCreated');
-        $this->modal('create-user')->close();
         session()->flash('message', 'User berhasil dibuat.');
+        $this->dispatch('userCreated');
+        $this->dispatch('close-modal', 'create-user');
     }
 
     public function updateUser(): void
@@ -202,9 +204,9 @@ class ManageUsers extends Component
         }
 
         $this->resetForm();
-        $this->dispatch('userUpdated');
-        $this->modal('edit-user')->close();
         session()->flash('message', 'User berhasil diperbarui.');
+        $this->dispatch('userUpdated');
+        $this->dispatch('close-modal', 'edit-user');
     }
 
     public function deleteUser(): void
@@ -222,9 +224,9 @@ class ManageUsers extends Component
         $user->delete();
 
         $this->resetForm();
-        $this->dispatch('userDeleted');
-        $this->modal('delete-user')->close();
         session()->flash('message', 'User berhasil dihapus.');
+        $this->dispatch('userDeleted');
+        $this->dispatch('close-modal', 'delete-user');
     }
 
     public function resetForm(): void
@@ -250,11 +252,13 @@ class ManageUsers extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->dispatch('searchUpdated');
     }
 
     public function updatedRoleFilter(): void
     {
         $this->resetPage();
+        $this->dispatch('roleFilterUpdated');
     }
 
     public function onModalClose(): void

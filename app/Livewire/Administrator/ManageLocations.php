@@ -45,6 +45,8 @@ class ManageLocations extends Component
         'locationCreated' => '$refresh',
         'locationUpdated' => '$refresh',
         'locationDeleted' => '$refresh',
+        'searchUpdated' => '$refresh',
+        'statusFilterUpdated' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 
@@ -106,9 +108,9 @@ class ManageLocations extends Component
             ]);
 
             $this->resetForm();
-            $this->dispatch('locationCreated');
-            $this->modal('create-location')->close();
             session()->flash('message', 'Lokasi berhasil dibuat.');
+            $this->dispatch('locationCreated');
+            $this->dispatch('close-modal', 'create-location');
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat membuat lokasi: '.$e->getMessage());
         }
@@ -131,9 +133,9 @@ class ManageLocations extends Component
             ]);
 
             $this->resetForm();
-            $this->dispatch('locationUpdated');
-            $this->modal('edit-location')->close();
             session()->flash('message', 'Lokasi berhasil diperbarui.');
+            $this->dispatch('locationUpdated');
+            $this->dispatch('close-modal', 'edit-location');
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat memperbarui lokasi: '.$e->getMessage());
         }
@@ -147,9 +149,9 @@ class ManageLocations extends Component
             $location->delete();
 
             $this->resetForm();
-            $this->dispatch('locationDeleted');
-            $this->modal('delete-location')->close();
             session()->flash('message', 'Lokasi berhasil dihapus.');
+            $this->dispatch('locationDeleted');
+            $this->dispatch('close-modal', 'delete-location');
         } catch (\Exception $e) {
             session()->flash('error', 'Terjadi kesalahan saat menghapus lokasi: '.$e->getMessage());
         }
@@ -172,11 +174,13 @@ class ManageLocations extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->dispatch('searchUpdated');
     }
 
     public function updatedStatusFilter(): void
     {
         $this->resetPage();
+        $this->dispatch('statusFilterUpdated');
     }
 
     public function onModalClose(): void

@@ -274,8 +274,8 @@ class FaceRecognitionService
         $width = $imageInfo[0];
         $height = $imageInfo[1];
 
-        // Minimum resolution requirements
-        if ($width < 300 || $height < 300) {
+        // Stricter minimum resolution requirements for face recognition
+        if ($width < 480 || $height < 480) {
             return false;
         }
 
@@ -293,7 +293,7 @@ class FaceRecognitionService
     }
 
     /**
-     * Basic face detection using image analysis
+     * Enhanced face detection using image analysis
      */
     protected static function basicFaceDetection(string $imageData): bool
     {
@@ -307,15 +307,17 @@ class FaceRecognitionService
         $width = imagesx($image);
         $height = imagesy($image);
 
-        // Very basic face detection - check for reasonable face-like proportions
-        // and ensure the image isn't too dark or too bright
+        // Enhanced face detection - check multiple criteria
         $darkPixels = 0;
         $brightPixels = 0;
+        $mediumPixels = 0;
         $totalPixels = 0;
+        $skinTonePixels = 0;
+        $contrastRegions = 0;
 
-        // Sample pixels to check brightness distribution
-        for ($x = 0; $x < $width; $x += 10) {
-            for ($y = 0; $y < $height; $y += 10) {
+        // Sample pixels to check various characteristics
+        for ($x = 0; $x < $width; $x += 8) {
+            for ($y = 0; $y < $height; $y += 8) {
                 $rgb = imagecolorat($image, $x, $y);
                 $r = ($rgb >> 16) & 0xFF;
                 $g = ($rgb >> 8) & 0xFF;
@@ -323,10 +325,33 @@ class FaceRecognitionService
 
                 $brightness = ($r + $g + $b) / 3;
 
+                // Brightness categorization
                 if ($brightness < 50) {
                     $darkPixels++;
                 } elseif ($brightness > 200) {
                     $brightPixels++;
+                } else {
+                    $mediumPixels++;
+                }
+
+                // Skin tone detection (basic range)
+                if ($r > 95 && $g > 40 && $b > 20 &&
+                    $r > $g && $r > $b &&
+                    $r - $g > 15 && $r - $b > 15) {
+                    $skinTonePixels++;
+                }
+
+                // Check for contrast (indicating facial features)
+                if ($x > 0 && $y > 0) {
+                    $neighborRgb = imagecolorat($image, $x - 8, $y - 8);
+                    $neighborR = ($neighborRgb >> 16) & 0xFF;
+                    $neighborG = ($neighborRgb >> 8) & 0xFF;
+                    $neighborB = $neighborRgb & 0xFF;
+                    $neighborBrightness = ($neighborR + $neighborG + $neighborB) / 3;
+
+                    if (abs($brightness - $neighborBrightness) > 30) {
+                        $contrastRegions++;
+                    }
                 }
 
                 $totalPixels++;
@@ -335,11 +360,43 @@ class FaceRecognitionService
 
         imagedestroy($image);
 
-        // Reject images that are too dark or too bright
+        // Calculate ratios
         $darkRatio = $darkPixels / $totalPixels;
         $brightRatio = $brightPixels / $totalPixels;
+        $mediumRatio = $mediumPixels / $totalPixels;
+        $skinRatio = $skinTonePixels / $totalPixels;
+        $contrastRatio = $contrastRegions / $totalPixels;
 
-        if ($darkRatio > 0.7 || $brightRatio > 0.7) {
+        // Enhanced strict validation criteria for better face detection
+        // 1. Reject if too dark or too bright (stricter thresholds)
+        if ($darkRatio > 0.4 || $brightRatio > 0.4) {
+            return false;
+        }
+
+        // 2. Must have substantial amount of medium-brightness pixels (face area)
+        if ($mediumRatio < 0.3) {
+            return false;
+        }
+
+        // 3. Must have adequate skin-tone pixels (stricter skin detection)
+        if ($skinRatio < 0.08) {
+            return false;
+        }
+
+        // 4. Must have good contrast (indicating clear facial features)
+        if ($contrastRatio < 0.15) {
+            return false;
+        }
+
+        // 5. Additional validation - reject if lighting is too uniform (indicates poor image quality)
+        $lightingVariance = ($darkRatio * $brightRatio * $mediumRatio);
+        if ($lightingVariance < 0.01) {
+            return false;
+        }
+
+        // 5. Check image dimensions ratio (faces are typically not too wide or tall)
+        $aspectRatio = max($width, $height) / min($width, $height);
+        if ($aspectRatio > 2.5) {
             return false;
         }
 

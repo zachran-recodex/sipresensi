@@ -59,6 +59,10 @@ class ManageAttendances extends Component
         'attendanceCreated' => '$refresh',
         'attendanceUpdated' => '$refresh',
         'attendanceDeleted' => '$refresh',
+        'scheduleUpdated' => '$refresh',
+        'searchUpdated' => '$refresh',
+        'locationFilterUpdated' => '$refresh',
+        'statusFilterUpdated' => '$refresh',
         'modal.close' => 'onModalClose',
     ];
 
@@ -100,9 +104,9 @@ class ManageAttendances extends Component
         ]);
 
         $this->resetForm();
-        $this->dispatch('attendanceCreated');
-        $this->modal('create-attendance')->close();
         session()->flash('message', 'Pengaturan kehadiran berhasil dibuat.');
+        $this->dispatch('attendanceCreated');
+        $this->dispatch('close-modal', 'create-attendance');
     }
 
     public function updateAttendance(): void
@@ -122,9 +126,9 @@ class ManageAttendances extends Component
         ]);
 
         $this->resetForm();
-        $this->dispatch('attendanceUpdated');
-        $this->modal('edit-attendance')->close();
         session()->flash('message', 'Pengaturan kehadiran berhasil diperbarui.');
+        $this->dispatch('attendanceUpdated');
+        $this->dispatch('close-modal', 'edit-attendance');
     }
 
     public function deleteAttendance(): void
@@ -133,9 +137,9 @@ class ManageAttendances extends Component
         $attendance->delete();
 
         $this->resetForm();
-        $this->dispatch('attendanceDeleted');
-        $this->modal('delete-attendance')->close();
         session()->flash('message', 'Pengaturan kehadiran berhasil dihapus.');
+        $this->dispatch('attendanceDeleted');
+        $this->dispatch('close-modal', 'delete-attendance');
     }
 
     public function resetForm(): void
@@ -153,16 +157,19 @@ class ManageAttendances extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->dispatch('searchUpdated');
     }
 
     public function updatedLocationFilter(): void
     {
         $this->resetPage();
+        $this->dispatch('locationFilterUpdated');
     }
 
     public function updatedStatusFilter(): void
     {
         $this->resetPage();
+        $this->dispatch('statusFilterUpdated');
     }
 
     public function onModalClose(): void
@@ -182,8 +189,8 @@ class ManageAttendances extends Component
             ];
         }
 
-        // Ensure the component is updated immediately
-        $this->dispatch('scheduleUpdated');
+        // Force component refresh to show/hide time inputs immediately
+        $this->dispatch('workDayToggled', ['day' => $day, 'isActive' => isset($this->dailySchedules[$day])]);
     }
 
     public function updateDaySchedule(int $day, string $field, string $value): void

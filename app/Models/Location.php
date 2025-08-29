@@ -49,6 +49,14 @@ class Location extends Model
     }
 
     /**
+     * Get the attendance records for this location.
+     */
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    /**
      * Check if the location is active.
      */
     public function isActive(): bool

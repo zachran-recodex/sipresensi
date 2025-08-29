@@ -184,12 +184,14 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">
-                                    @if(is_array($record->location))
-                                        @if(isset($record->location['coordinates']))
-                                            📍 {{ $record->location['coordinates']['latitude'] ?? 'N/A' }}, {{ $record->location['coordinates']['longitude'] ?? 'N/A' }}
+                                    @if(is_array($record->coordinates))
+                                        @if(isset($record->coordinates['coordinates']))
+                                            📍 {{ $record->coordinates['coordinates']['latitude'] ?? 'N/A' }}, {{ $record->coordinates['coordinates']['longitude'] ?? 'N/A' }}
+                                        @elseif(isset($record->coordinates['latitude']))
+                                            📍 {{ $record->coordinates['latitude'] ?? 'N/A' }}, {{ $record->coordinates['longitude'] ?? 'N/A' }}
                                         @endif
                                     @else
-                                        <div class="text-xs text-gray-500">{{ $record->location ?: 'N/A' }}</div>
+                                        <div class="text-xs text-gray-500">{{ $record->coordinates ?: 'N/A' }}</div>
                                     @endif
                                 </div>
                             </td>

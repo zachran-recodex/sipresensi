@@ -1,4 +1,12 @@
-<div x-data="{}">
+<div x-data="{}" x-init="
+    $wire.on('close-modal', (modalName) => {
+        $flux.modal(modalName).close();
+    });
+    $wire.on('workDayToggled', (data) => {
+        // Force re-render of the component to show/hide time inputs
+        $wire.$refresh();
+    });
+">
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
@@ -214,7 +222,10 @@
                                             />
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Keluar</label>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">
+                                                Jam Keluar
+                                                <span class="text-xs text-zinc-500">(jika lebih kecil dari jam masuk = hari berikutnya)</span>
+                                            </label>
                                             <flux:input
                                                 wire:model.live="dailySchedules.{{ $dayNum }}.clock_out"
                                                 type="time"
@@ -328,7 +339,10 @@
                                             />
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-medium text-zinc-700 mb-1">Jam Keluar</label>
+                                            <label class="block text-xs font-medium text-zinc-700 mb-1">
+                                                Jam Keluar
+                                                <span class="text-xs text-zinc-500">(jika lebih kecil dari jam masuk = hari berikutnya)</span>
+                                            </label>
                                             <flux:input
                                                 wire:model.live="dailySchedules.{{ $dayNum }}.clock_out"
                                                 type="time"

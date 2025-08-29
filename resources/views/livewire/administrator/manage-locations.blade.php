@@ -1,4 +1,8 @@
-<div x-data="{}">
+<div x-data="{}" x-init="
+    $wire.on('close-modal', (modalName) => {
+        $flux.modal(modalName).close();
+    });
+">
 	<div class="space-y-6">
 		<!-- Header -->
 		<div class="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">

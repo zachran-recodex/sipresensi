@@ -87,7 +87,7 @@ class FaceEnrollmentComponent extends Component
 
             // Validate image quality with face detection
             if (! FaceRecognitionService::validateBase64Image($imageData, true)) {
-                throw new \Exception('Kualitas gambar tidak memenuhi syarat. Pastikan wajah terlihat jelas, pencahayaan cukup, dan resolusi minimal 300x300 pixel.');
+                throw new \Exception('Gambar tidak memenuhi syarat untuk pendaftaran wajah. Pastikan: 1) Wajah terlihat dengan jelas tanpa tertutup masker/tangan/kacamata hitam, 2) Pencahayaan yang cukup terang dan merata, 3) Tidak ada bayangan berlebihan di wajah, 4) Wajah menghadap langsung ke kamera, 5) Latar belakang yang kontras dengan wajah, 6) Resolusi minimal 480x480 pixel, 7) Jarak yang tepat (tidak terlalu dekat/jauh).');
             }
 
             $this->capturedImage = $imageData;
@@ -111,7 +111,7 @@ class FaceEnrollmentComponent extends Component
             }
 
             if (! FaceRecognitionService::validateBase64Image($this->capturedImage, true)) {
-                throw new \Exception('Gambar tidak valid atau tidak menunjukkan wajah dengan jelas');
+                throw new \Exception('Gambar tidak memenuhi syarat untuk pendaftaran wajah. Pastikan wajah terlihat jelas tanpa tertutup masker/tangan/kacamata hitam, pencahayaan cukup dan merata, latar belakang kontras, resolusi minimal 480x480 pixel, dan menghadap langsung kamera.');
             }
 
             $biznetUserId = 'user_'.$this->userId.'_'.time();

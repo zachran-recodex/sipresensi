@@ -68,17 +68,19 @@ php artisan migrate:fresh --seed
 Tambahkan konfigurasi Face API di file `.env`:
 
 ```env
-BIZNET_FACE_API_TOKEN=your_api_token
+BIZNET_FACE_API_TOKEN=tok_3zjeFwGN3Bqf1GrePCpHnEuc4s5zKyuf3RH7
 BIZNET_FACE_API_URL=https://api.biznet.co.id/face
-BIZNET_FACE_GALLERY_ID=your_gallery_id
+BIZNET_FACE_GALLERY_ID=sipresensi_production
 ```
 
 ### 6. Konfigurasi Admin Contact (Opsional)
 
 ```env
-ADMIN_CONTACT_NAME="Admin Name"
-ADMIN_CONTACT_PHONE="08123456789"
+ADMIN_CONTACT_NAME="Administrator"
 ADMIN_CONTACT_EMAIL="admin@company.com"
+ADMIN_CONTACT_PHONE="+62 123-456-7890"
+ADMIN_CONTACT_WHATSAPP="+62 123-456-7890"
+ADMIN_CONTACT_DEPARTMENT="IT Support / HR"
 ```
 
 ## 🏃‍♂️ Menjalankan Aplikasi

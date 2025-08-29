@@ -24,7 +24,8 @@
       "mcp__laravel-boost__get-config",
       "mcp__laravel-boost__list-available-config-keys",
       "mcp__laravel-boost__list-available-env-vars",
-      "mcp__laravel-boost__database-query"
+      "mcp__laravel-boost__database-query",
+      "mcp__laravel-boost__last-error"
     ]
   },
   "enableAllProjectMcpServers": true,
