@@ -29,14 +29,7 @@ Sipresensi adalah sistem manajemen absensi berbasis Laravel dengan teknologi pen
 
 ## 🚀 Instalasi
 
-### 1. Clone Repository
-
-```bash
-git clone <repository-url>
-cd sipresensi
-```
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 
 ```bash
 # Install PHP dependencies
@@ -46,7 +39,7 @@ composer install
 npm install
 ```
 
-### 3. Konfigurasi Environment
+### 2. Konfigurasi Environment
 
 ```bash
 # Copy environment file
@@ -56,14 +49,14 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Konfigurasi Database
+### 3. Konfigurasi Database
 
 ```bash
 # Jalankan migrasi dan seeder
 php artisan migrate:fresh --seed
 ```
 
-### 5. Konfigurasi Biznet Face API
+### 4. Konfigurasi Biznet Face API
 
 Tambahkan konfigurasi Face API di file `.env`:
 
@@ -73,7 +66,7 @@ BIZNET_FACE_API_URL=https://api.biznet.co.id/face
 BIZNET_FACE_GALLERY_ID=sipresensi_production
 ```
 
-### 6. Konfigurasi Admin Contact (Opsional)
+### 5. Konfigurasi Admin Contact (Opsional)
 
 ```env
 ADMIN_CONTACT_NAME="Administrator"
